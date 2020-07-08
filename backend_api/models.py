@@ -60,7 +60,7 @@ class FieldOfInterest(models.Model):
 class Teacher(models.Model):
     """Workshop teacher database model"""
     name = models.CharField(max_length=255)
-    pic_path = models.CharField(max_length=511)
+    pic = models.ImageField()
     cv_path = models.CharField(max_length=511, blank=True, default="")
     desc = models.CharField(max_length=65535)
 
@@ -68,7 +68,7 @@ class Teacher(models.Model):
 class Presenter(models.Model):
     """Presentation presenter database model"""
     name = models.CharField(max_length=255)
-    pic_path = models.CharField(max_length=511)
+    pic = models.ImageField()
     workplace = models.CharField(max_length=255)
     paper = models.CharField(max_length=255)
     cv_path = models.CharField(max_length=511, blank=True, default="")
