@@ -60,7 +60,7 @@ class FieldOfInterest(models.Model):
 class Teacher(models.Model):
     """Workshop teacher database model"""
     name = models.CharField(max_length=255)
-    pic = models.ImageField()
+    pic = models.ImageField(blank=True)
     cv_path = models.CharField(max_length=511, blank=True, default="")
     desc = models.CharField(max_length=65535)
 
@@ -68,9 +68,9 @@ class Teacher(models.Model):
 class Presenter(models.Model):
     """Presentation presenter database model"""
     name = models.CharField(max_length=255)
-    pic = models.ImageField()
-    workplace = models.CharField(max_length=255)
-    paper = models.CharField(max_length=255)
+    pic = models.ImageField(blank=True)
+    workplace = models.CharField(max_length=255, blank=True)
+    paper = models.CharField(max_length=255, blank=True)
     cv_path = models.CharField(max_length=511, blank=True, default="")
     desc = models.CharField(max_length=65535)
 
@@ -91,9 +91,15 @@ class Presentation(models.Model):
 class User(models.Model):
     """Generic non-admin user profile data"""
     account = models.OneToOneField(Account, on_delete=models.CASCADE, primary_key=True)
+    name = models.CharField(max_length=255)
     fields_of_interest = models.ManyToManyField(FieldOfInterest, blank=True)
     registered_workshops = models.ManyToManyField(Workshop, blank=True)
     registered_for_presentations = models.BooleanField(default=False)
     phone_number = models.CharField(max_length=12, validators=[validators.validate_all_number])
     national_code = models.CharField(max_length=10,
                                      validators=[RegexValidator(regex='^.{10}$', message='Length has to be 10')])
+
+
+class Misc(models.Model):
+    name = models.CharField(max_length=255, primary_key=True)
+    desc = models.CharField(max_length=65535, blank=True)

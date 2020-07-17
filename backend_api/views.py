@@ -79,6 +79,21 @@ class PresentationViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
 
+class MiscViewSet(viewsets.ViewSet):
+    serializer_class = serializers.MiscSerializer
+
+    def list(self, request, **kwargs):
+        queryset = models.Misc.objects.all()
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        queryset = models.Misc.objects.all()
+        misc = get_object_or_404(queryset, pk=pk)
+        serializer = self.serializer_class(misc)
+        return Response(serializer.data)
+
+
 class UserAPIView(APIView):
     serializer_class = serializers.UserSerializer
 
@@ -90,7 +105,7 @@ class UserAPIView(APIView):
 
         if serializer.is_valid():
             foi_queryset = models.FieldOfInterest.objects.all()
-            #Fields of interest array
+            # Fields of interest array
             fois = []
             for id in serializer.validated_data.get('fields_of_interest'):
                 foi = get_object_or_404(foi_queryset, pk=id)
@@ -103,6 +118,7 @@ class UserAPIView(APIView):
 
             user = models.User.objects.create(
                 account=account,
+                name=serializer.validated_data.get('name'),
                 phone_number=serializer.validated_data.get('phone_number'),
                 national_code=serializer.validated_data.get('national_code'),
             )

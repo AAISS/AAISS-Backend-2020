@@ -10,6 +10,7 @@ router.register('teacher', views.TeacherViewSet, basename='teacher')
 router.register('presenter', views.PresenterViewSet, basename='presenter')
 router.register('workshop', views.WorkshopViewSet, basename='workshop')
 router.register('presentation', views.PresentationViewSet, basename='presentation')
+router.register('misc', views.MiscViewSet, basename='misc')
 
 urlpatterns = [
     path('', include(router.urls)),
