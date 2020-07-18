@@ -1,3 +1,6 @@
+sudo apt update
+sudo apt install python3-pip
+sudo apt-get install python3-venv
 python3 -m venv aaiss-backend-venv
 source ./aaiss-backend-venv/bin/activate
 pip3 install -r requirements.txt
