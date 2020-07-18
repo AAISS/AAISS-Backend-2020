@@ -1,6 +1,6 @@
 python -m venv aaiss-backend-venv
 source ./aaiss-backend-venv/bin/activate
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 echo  "SECRET_KEY=(dosen't matter using development key for now)
 EMAIL_HOST=none
 EMAIL_PORT=0
