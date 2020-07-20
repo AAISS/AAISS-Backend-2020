@@ -85,12 +85,16 @@ class Workshop(models.Model):
     teachers = models.ManyToManyField(Teacher)
     cost = models.PositiveIntegerField()
     desc = models.CharField(max_length=BIG_MAX_LENGTH)
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
 
 
 class Presentation(models.Model):
     name = models.CharField(max_length=SMALL_MAX_LENGTH)
     presenters = models.ManyToManyField(Presenter)
     desc = models.CharField(max_length=BIG_MAX_LENGTH)
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
 
 
 class User(models.Model):
