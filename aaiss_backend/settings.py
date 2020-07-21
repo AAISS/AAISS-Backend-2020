@@ -34,7 +34,7 @@ SECRET_KEY = env.str("SECRET_KEY", 'orlch#mu_+2-my=fo)akh_3+^j7+7tc@v*-*z^(g*%(&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", False)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(" ")
 
 # Application definition
 

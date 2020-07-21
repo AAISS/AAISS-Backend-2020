@@ -3,8 +3,14 @@ version: '3'
 services:
   web:
     build: .
-    command: bash -c "python3 manage.py migrate && python3 manage.py collectstatic --noinput && python3 manage.py runserver 0.0.0.0:6446"
+    command: bash -c "python3 manage.py migrate && python3 manage.py collectstatic --noinput && gunicorn hello_django.wsgi:application --bind 0.0.0.0:6446"
     volumes:
       - .:/backend_aaiss
+    expose:
+      - 6446
+  nginx:
+    build: ./nginx
     ports:
-      - "6446:6446"
+      - 1337:80
+    depends_on:
+      - web
