@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 import environ
+import mimetypes
+
+# To make css load
+mimetypes.add_type("text/css", ".css", True)
 
 env = environ.Env()
 environ.Env.read_env()
@@ -123,7 +127,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
+# Default auth model
 AUTH_USER_MODEL = 'backend_api.Account'
 
 # media
@@ -142,6 +148,3 @@ EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL')
 # CORS
 CORS_URLS_REGEX = r'^/api/.*$'
 CORS_ORIGIN_ALLOW_ALL = True
-
-# STATIC
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
