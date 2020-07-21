@@ -4,6 +4,7 @@ ENV PYTHONUNBUFFERED 1
 ENV HOME=/
 ENV APP_HOME=/backend_aaiss
 RUN mkdir /backend_aaiss
+RUN mkdir $APP_HOME/media
 WORKDIR /backend_aaiss
 COPY requirements.txt /backend_aaiss/
 RUN pip install --upgrade pip

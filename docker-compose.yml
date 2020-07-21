@@ -10,7 +10,9 @@ services:
       - 6446
   nginx:
     build: ./nginx
+    volumes:
+      - .:/backend_aaiss
     ports:
-      - 1337:80
+      - 6446:80
     depends_on:
       - web
