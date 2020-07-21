@@ -16,6 +16,7 @@ import mimetypes
 
 # To make css load
 mimetypes.add_type("text/css", ".css", True)
+mimetypes.add_type("text/html", ".css", True)
 
 env = environ.Env()
 environ.Env.read_env()
