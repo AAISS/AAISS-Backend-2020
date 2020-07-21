@@ -142,3 +142,6 @@ EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL')
 # CORS
 CORS_URLS_REGEX = r'^/api/.*$'
 CORS_ORIGIN_ALLOW_ALL = True
+
+# STATIC
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
