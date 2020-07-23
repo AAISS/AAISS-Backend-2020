@@ -76,7 +76,7 @@ class MailerAdmin(admin.ModelAdmin):
                 mails = []
                 for workshop in mailer.workshop_selection:
                     for user in models.User.objects.all():
-                        if workshop in user.registered_workshops:
+                        if workshop in user.registered_workshops.all():
                             if __name__ == '__main__':
                                 mails.append(user.account.email)
                 MailerThread(mailer.subject, mails, mailer.HTML_body).start()
