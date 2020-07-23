@@ -63,6 +63,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'aaiss_backend.urls'
+APPEND_SLASH = False
 
 TEMPLATES = [
     {

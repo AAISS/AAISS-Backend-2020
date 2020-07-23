@@ -164,7 +164,7 @@ class PaymentAPIView(APIView):
                 'MerchantID': env.str('MERCHANT_ID'),
                 'Amount': total_price,
                 'Description': 'ثبت نام در کارگاه ها/ارائه های رخداد AAISS',
-                'CallbackURL': env.str('BASE_URL') + 'payment/'
+                'CallbackURL': env.str('BASE_URL') + '/api/payment/'
             }
 
             zarin_response = self.client.service.PaymentRequest(payment_init_data['MerchantID'], payment_init_data['Amount'],
@@ -172,10 +172,11 @@ class PaymentAPIView(APIView):
                                                            payment_init_data['CallbackURL'])
             if zarin_response.Status == 100:
                 payment = models.Payment.objects.create(authority=str(zarin_response.Authority),
-                                                        total_price=total_price, user=user, workshops=workshops,
+                                                        total_price=total_price, user=user,
                                                         presentation=presentation, is_done=False, ref_id='')
+                payment.workshops.set(workshops)
                 payment.save()
-                return redirect('https://www.zarinpal.com/pg/StartPay/' + str(zarin_response.Authority))
+                return Response('https://www.zarinpal.com/pg/StartPay/' + str(zarin_response.Authority))
             else:
                 return Response({'Payment Error with code: ' + zarin_response.Status},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)

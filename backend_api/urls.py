@@ -4,7 +4,13 @@ from rest_framework.routers import DefaultRouter
 from backend_api import views
 
 
-router = DefaultRouter()
+class OptionalSlashRouter(DefaultRouter):
+    def __init__(self, *args, **kwargs):
+        super(DefaultRouter, self).__init__(*args, **kwargs)
+        self.trailing_slash = '/?'
+
+
+router = OptionalSlashRouter()
 router.register('foi', views.FieldOfInterestViewSet, basename='field_of_interest')
 router.register('teacher', views.TeacherViewSet, basename='teacher')
 router.register('presenter', views.PresenterViewSet, basename='presenter')
