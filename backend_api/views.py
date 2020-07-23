@@ -1,3 +1,4 @@
+from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404, redirect
 
 from rest_framework.views import APIView
@@ -109,15 +110,18 @@ class UserAPIView(APIView):
             foi_queryset = models.FieldOfInterest.objects.all()
             # Fields of interest array
             fois = []
-            for pkid in serializer.validated_data.get('fields_of_interest'):
-                foi = get_object_or_404(foi_queryset, pk=pkid)
-                fois.append(foi)
-
-            account = models.Account.objects.create_user(
-                email=serializer.validated_data.get('email'),
-                password='nothing'
-            )
-
+            if serializer.validated_data.get('fields_of_interest') is not None:
+                for pkid in serializer.validated_data.get('fields_of_interest'):
+                    foi = get_object_or_404(foi_queryset, pk=pkid)
+                    fois.append(foi)
+            try:
+                account = models.Account.objects.create_user(
+                    email=serializer.validated_data.get('email'),
+                    password='nothing'
+                )
+            except IntegrityError:
+                return Response({"message": "User already exist"}, status=status.HTTP_202_ACCEPTED)
+            account.save()
             user = models.User.objects.create(
                 account=account,
                 name=serializer.validated_data.get('name'),
@@ -127,9 +131,10 @@ class UserAPIView(APIView):
             user.fields_of_interest.set(fois)
             user.registered_workshops.set([])
             user.save()
+
             return Response({'message': 'User created'})
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PaymentAPIView(APIView):
@@ -167,9 +172,10 @@ class PaymentAPIView(APIView):
                 'CallbackURL': env.str('BASE_URL') + '/api/payment/'
             }
 
-            zarin_response = self.client.service.PaymentRequest(payment_init_data['MerchantID'], payment_init_data['Amount'],
-                                                           payment_init_data['Description'], '', '',
-                                                           payment_init_data['CallbackURL'])
+            zarin_response = self.client.service.PaymentRequest(payment_init_data['MerchantID'],
+                                                                payment_init_data['Amount'],
+                                                                payment_init_data['Description'], '', '',
+                                                                payment_init_data['CallbackURL'])
             if zarin_response.Status == 100:
                 payment = models.Payment.objects.create(authority=str(zarin_response.Authority),
                                                         total_price=total_price, user=user,
@@ -192,19 +198,18 @@ class PaymentAPIView(APIView):
             except:
                 return Response(status=status.HTTP_404_NOT_FOUND)
             if zarin_status != 'OK':
-                payment.user.account.delete()
-                payment.user.account.save()
                 return Response({'message': 'تراکنش ناموفق بود'}, status=status.HTTP_402_PAYMENT_REQUIRED)
 
             try:
-                payment.user.registered_workshops.set(payment.workshops)
-                payment.user.registered_for_presentations.set(payment.presentation)
+                new_registered_workshops = list(payment.user.registered_workshops.all())
+                new_registered_workshops.append(payment.workshops)
+                payment.user.registered_workshops.set(new_registered_workshops)
+                payment.user.registered_for_presentations.set(
+                    payment.user.registered_for_presentations or payment.presentation)
                 payment.user.save()
                 payment.is_done = True
                 payment.save()
             except:
-                payment.user.account.delete()
-                payment.user.account.save()
                 return Response({'message': 'تراکنش ناموفق بود'}, status=status.HTTP_402_PAYMENT_REQUIRED)
 
             zarin_response = self.client.service.PaymentVerification(env.str('MERCHANT_ID'), authority,
@@ -216,8 +221,6 @@ class PaymentAPIView(APIView):
             elif zarin_response.Status == 101:
                 return redirect(env.str('BASE_URL'))
             else:
-                payment.user.account.delete()
-                payment.user.account.save()
                 return redirect(env.str('BASE_URL'))
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
