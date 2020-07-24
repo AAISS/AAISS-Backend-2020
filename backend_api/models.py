@@ -94,7 +94,7 @@ class Workshop(models.Model):
     cost = models.PositiveIntegerField()
     desc = models.CharField(max_length=BIG_MAX_LENGTH)
     has_project = models.BooleanField(default=False, blank=False)
-    prerequisites = models.CharField(max_length=BIG_MAX_LENGTH, default='')
+    prerequisites = models.CharField(max_length=BIG_MAX_LENGTH, default='', blank=True)
     capacity = models.PositiveSmallIntegerField(default=50)
 
     NOT_ASSIGNED = 1
