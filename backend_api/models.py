@@ -112,6 +112,7 @@ class User(models.Model):
 class Misc(models.Model):
     name = models.CharField(max_length=SMALL_MAX_LENGTH, primary_key=True)
     desc = models.CharField(max_length=BIG_MAX_LENGTH, blank=True)
+    pic = models.ImageField(blank=True)
 
 
 class Mailer(models.Model):
