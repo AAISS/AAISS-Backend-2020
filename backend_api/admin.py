@@ -34,12 +34,26 @@ class UserAdmin(admin.ModelAdmin):
 
 admin.site.register(models.User, UserAdmin)
 admin.site.register(models.FieldOfInterest)
-admin.site.register(models.Teacher, desc_creator(models.Teacher))
+
+
+class TeacherAdminForm(forms.ModelForm):
+    bio = forms.CharField(widget=forms.Textarea)
+
+    class Meta:
+        model = models.Presenter
+        fields = '__all__'
+
+
+class TeacherAdmin(admin.ModelAdmin):
+    form = TeacherAdminForm
+
+
+admin.site.register(models.Teacher, TeacherAdmin)
 admin.site.register(models.Workshop, desc_creator(models.Workshop))
 
 
 class PresenterAdminForm(forms.ModelForm):
-    desc = forms.CharField(widget=forms.Textarea)
+    bio = forms.CharField(widget=forms.Textarea)
 
     class Meta:
         model = models.Presenter

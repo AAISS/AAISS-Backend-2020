@@ -69,7 +69,7 @@ class Teacher(models.Model):
     name = models.CharField(max_length=SMALL_MAX_LENGTH)
     pic = models.ImageField(blank=True)
     cv_path = models.CharField(max_length=511, blank=True, default="")
-    desc = models.CharField(max_length=BIG_MAX_LENGTH)
+    bio = models.CharField(max_length=BIG_MAX_LENGTH)
 
     def __str__(self):
         return f"Teacher with id {self.id}: {self.name}"
@@ -82,7 +82,7 @@ class Presenter(models.Model):
     workplace = models.CharField(max_length=SMALL_MAX_LENGTH, blank=True)
     paper = models.CharField(max_length=SMALL_MAX_LENGTH, blank=True)
     cv_path = models.CharField(max_length=511, blank=True, default="")
-    desc = models.CharField(max_length=BIG_MAX_LENGTH)
+    bio = models.CharField(max_length=BIG_MAX_LENGTH)
 
     def __str__(self):
         return f"Presenter with id {self.id}: {self.name}"
