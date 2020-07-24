@@ -203,7 +203,9 @@ class PaymentAPIView(APIView):
                                 status=status.HTTP_402_PAYMENT_REQUIRED)
 
             try:
-                new_registered_workshops = list(payment.user.registered_workshops.all())
+                new_registered_workshops = []
+                for ws in payment.user.registered_workshops.all():
+                    new_registered_workshops.append(ws)
                 new_registered_workshops.append(payment.workshops)
                 payment.user.registered_workshops.set(new_registered_workshops)
                 payment.user.registered_for_presentations.set(
@@ -212,8 +214,7 @@ class PaymentAPIView(APIView):
                 payment.is_done = True
                 payment.save()
             except Exception as e:
-                serialized_obj = ds.serialize('json', new_registered_workshops)
-                return Response({'message': 'تراکنش ناموفق بود', 'exception': e.__str__(), 'obj': serialized_obj},
+                return Response({'message': 'تراکنش ناموفق بود', 'exception': e.__str__()},
                                 status=status.HTTP_402_PAYMENT_REQUIRED)
 
             zarin_response = self.client.service.PaymentVerification(env.str('MERCHANT_ID'), authority,
