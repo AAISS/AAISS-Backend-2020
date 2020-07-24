@@ -1,4 +1,5 @@
 from django.db.utils import IntegrityError
+from django.core import serializers as ds
 from django.shortcuts import get_object_or_404, redirect
 
 from rest_framework.views import APIView
@@ -211,7 +212,8 @@ class PaymentAPIView(APIView):
                 payment.is_done = True
                 payment.save()
             except Exception as e:
-                return Response({'message': 'تراکنش ناموفق بود', 'exception': [e.__str__(), new_registered_workshops]},
+                serialized_obj = ds.serialize('json', new_registered_workshops)
+                return Response({'message': 'تراکنش ناموفق بود', 'exception': e.__str__(), 'obj': serialized_obj},
                                 status=status.HTTP_402_PAYMENT_REQUIRED)
 
             zarin_response = self.client.service.PaymentVerification(env.str('MERCHANT_ID'), authority,
