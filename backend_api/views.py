@@ -29,6 +29,11 @@ class TeacherViewSet(viewsets.ViewSet):
     def list(self, request, **kwargs):
         queryset = models.Teacher.objects.all()
         serializer = self.serializer_class(queryset, many=True)
+        for teacher_data in serializer.data:
+            teacher = get_object_or_404(queryset, pk=teacher_data['id'])
+            teacher_data['workshops'] = dict()
+            for workshop in models.Workshop.objects.filter(teachers=teacher).all():
+                teacher_data['workshops'][workshop.id] = workshop.name
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
