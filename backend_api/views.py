@@ -209,8 +209,8 @@ class PaymentAPIView(APIView):
                 for pws in payment.workshops.all():
                     new_registered_workshops.append(pws)
                 payment.user.registered_workshops.set(new_registered_workshops)
-                payment.user.registered_for_presentations.set(
-                    payment.user.registered_for_presentations or payment.presentation)
+                payment.user.registered_for_presentations = (
+                            payment.user.registered_for_presentations or payment.presentation)
                 payment.user.save()
                 payment.is_done = True
                 payment.save()
