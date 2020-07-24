@@ -206,7 +206,8 @@ class PaymentAPIView(APIView):
                 new_registered_workshops = []
                 for ws in payment.user.registered_workshops.all():
                     new_registered_workshops.append(ws)
-                new_registered_workshops.append(payment.workshops)
+                for pws in payment.workshops.all():
+                    new_registered_workshops.append(pws)
                 payment.user.registered_workshops.set(new_registered_workshops)
                 payment.user.registered_for_presentations.set(
                     payment.user.registered_for_presentations or payment.presentation)
@@ -214,7 +215,7 @@ class PaymentAPIView(APIView):
                 payment.is_done = True
                 payment.save()
             except Exception as e:
-                return Response({'message': 'تراکنش ناموفق بود', 'exception': e},
+                return Response({'message': 'تراکنش ناموفق بود', 'exception': e.__str__()},
                                 status=status.HTTP_402_PAYMENT_REQUIRED)
 
             zarin_response = self.client.service.PaymentVerification(env.str('MERCHANT_ID'), authority,
