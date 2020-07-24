@@ -97,7 +97,10 @@ class Workshop(models.Model):
     end_date = models.DateTimeField()
 
     def __str__(self):
-        return f"Workshop with id {self.id}: {self.name}"
+        name = ""
+        for teacher in self.teachers.all():
+            name += teacher.name + " "
+        return f"{name}: {self.name}"
 
 
 class Presentation(models.Model):
@@ -108,7 +111,10 @@ class Presentation(models.Model):
     end_date = models.DateTimeField()
 
     def __str__(self):
-        return f"Presentation with id {self.id}: {self.name}"
+        name = ""
+        for presenter in self.presenters.all():
+            name += presenter.name + " "
+        return f"{name}: {self.name}"
 
 
 class User(models.Model):
