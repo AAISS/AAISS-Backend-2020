@@ -35,7 +35,13 @@ class TeacherViewSet(viewsets.ViewSet):
         queryset = models.Teacher.objects.all()
         teacher = get_object_or_404(queryset, pk=pk)
         serializer = self.serializer_class(teacher)
-        return Response(serializer.data)
+        workshops = []
+        for workshop in models.Workshop.objects.filter(teachers=teacher).all():
+            workshops.append(workshop.id)
+        print(workshops)
+        response = serializer.data
+        response['workshops'] = workshops
+        return Response(response)
 
 
 class PresenterViewSet(viewsets.ViewSet):
@@ -50,7 +56,13 @@ class PresenterViewSet(viewsets.ViewSet):
         queryset = models.Presenter.objects.all()
         presenter = get_object_or_404(queryset, pk=pk)
         serializer = self.serializer_class(presenter)
-        return Response(serializer.data)
+        presentations = []
+        for presentation in models.Presentation.objects.filter(presenters=presenter).all():
+            presentations.append(presentation.id)
+        print(presentations)
+        response = serializer.data
+        response['presentations'] = presentations
+        return Response(response)
 
 
 class WorkshopViewSet(viewsets.ViewSet):
@@ -211,7 +223,7 @@ class PaymentAPIView(APIView):
                     new_registered_workshops.append(pws)
                 payment.user.registered_workshops.set(new_registered_workshops)
                 payment.user.registered_for_presentations = (
-                            payment.user.registered_for_presentations or payment.presentation)
+                        payment.user.registered_for_presentations or payment.presentation)
                 payment.user.save()
                 payment.is_done = True
                 payment.save()
