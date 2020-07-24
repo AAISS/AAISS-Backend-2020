@@ -7,7 +7,6 @@ from django.utils.translation import ugettext_lazy as _
 
 from backend_api import validators
 
-
 SMALL_MAX_LENGTH = 255
 BIG_MAX_LENGTH = 65535
 
@@ -61,6 +60,9 @@ class FieldOfInterest(models.Model):
     """Field of interest which user can add to their profile"""
     name = models.CharField(max_length=SMALL_MAX_LENGTH)
 
+    def __str__(self):
+        return f"FOI with name: {self.name}"
+
 
 class Teacher(models.Model):
     """Workshop teacher database model"""
@@ -68,6 +70,9 @@ class Teacher(models.Model):
     pic = models.ImageField(blank=True)
     cv_path = models.CharField(max_length=511, blank=True, default="")
     desc = models.CharField(max_length=BIG_MAX_LENGTH)
+
+    def __str__(self):
+        return f"Teacher with id {self.id}: {self.name}"
 
 
 class Presenter(models.Model):
@@ -79,6 +84,9 @@ class Presenter(models.Model):
     cv_path = models.CharField(max_length=511, blank=True, default="")
     desc = models.CharField(max_length=BIG_MAX_LENGTH)
 
+    def __str__(self):
+        return f"Presenter with id {self.id}: {self.name}"
+
 
 class Workshop(models.Model):
     name = models.CharField(max_length=SMALL_MAX_LENGTH)
@@ -88,6 +96,9 @@ class Workshop(models.Model):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
 
+    def __str__(self):
+        return f"Workshop with id {self.id}: {self.name}"
+
 
 class Presentation(models.Model):
     name = models.CharField(max_length=SMALL_MAX_LENGTH)
@@ -95,6 +106,9 @@ class Presentation(models.Model):
     desc = models.CharField(max_length=BIG_MAX_LENGTH)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
+
+    def __str__(self):
+        return f"Presentation with id {self.id}: {self.name}"
 
 
 class User(models.Model):
@@ -108,11 +122,17 @@ class User(models.Model):
     national_code = models.CharField(max_length=10,
                                      validators=[RegexValidator(regex='^.{10}$', message='Length has to be 10')])
 
+    def __str__(self):
+        return f"{self.account}"
+
 
 class Misc(models.Model):
     name = models.CharField(max_length=SMALL_MAX_LENGTH, primary_key=True)
     desc = models.CharField(max_length=BIG_MAX_LENGTH, blank=True)
     pic = models.ImageField(blank=True)
+
+    def __str__(self):
+        return f"Misc with name {self.name}"
 
 
 class Mailer(models.Model):
@@ -136,6 +156,9 @@ class Mailer(models.Model):
     user_selection = models.ManyToManyField(User, blank=True)
     HTML_body = models.CharField(max_length=BIG_MAX_LENGTH)
 
+    def __str__(self):
+        return f"Mailer with id {self.id}: subject= {self.subject}"
+
 
 class Payment(models.Model):
     authority = models.CharField(max_length=SMALL_MAX_LENGTH, primary_key=True)
@@ -145,3 +168,6 @@ class Payment(models.Model):
     presentation = models.BooleanField(default=False, blank=True)
     is_done = models.BooleanField(default=False)
     ref_id = models.CharField(default='', max_length=SMALL_MAX_LENGTH)
+
+    def __str__(self):
+        return f"Payment for {self.user.account}"

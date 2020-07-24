@@ -40,7 +40,6 @@ admin.site.register(models.Workshop, desc_creator(models.Workshop))
 
 class PresenterAdminForm(forms.ModelForm):
     desc = forms.CharField(widget=forms.Textarea)
-    cv_path = forms.CharField(widget=forms.Textarea)
 
     class Meta:
         model = models.Presenter
