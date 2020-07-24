@@ -211,7 +211,7 @@ class PaymentAPIView(APIView):
                 payment.is_done = True
                 payment.save()
             except Exception as e:
-                return Response({'message': 'تراکنش ناموفق بود', 'exception': e.__str__()},
+                return Response({'message': 'تراکنش ناموفق بود', 'exception': e},
                                 status=status.HTTP_402_PAYMENT_REQUIRED)
 
             zarin_response = self.client.service.PaymentVerification(env.str('MERCHANT_ID'), authority,
