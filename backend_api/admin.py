@@ -20,16 +20,40 @@ def desc_creator(selected_model):
 
     class Admin(admin.ModelAdmin):
         form = AdminForm
+        list_display = ('name',)
 
     return Admin
 
 
 admin.site.register(models.Account)
-admin.site.register(models.User)
+
+
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('account',)
+
+
+admin.site.register(models.User, UserAdmin)
 admin.site.register(models.FieldOfInterest)
 admin.site.register(models.Teacher, desc_creator(models.Teacher))
 admin.site.register(models.Workshop, desc_creator(models.Workshop))
-admin.site.register(models.Presenter, desc_creator(models.Presenter))
+
+
+class PresenterAdminForm(forms.ModelForm):
+    desc = forms.CharField(widget=forms.Textarea)
+    cv_path = forms.CharField(widget=forms.Textarea)
+
+    class Meta:
+        model = models.Presenter
+        fields = '__all__'
+
+
+class PresenterAdmin(admin.ModelAdmin):
+    form = PresenterAdminForm
+    list_display = ('name',)
+
+
+admin.site.register(models.Presenter, PresenterAdmin)
+
 admin.site.register(models.Presentation, desc_creator(models.Presentation))
 admin.site.register(models.Misc, desc_creator(models.Misc))
 
