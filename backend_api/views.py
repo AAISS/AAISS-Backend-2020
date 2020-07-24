@@ -94,9 +94,10 @@ class PresentationViewSet(viewsets.ViewSet):
         queryset = models.Presentation.objects.all()
         serializer = self.serializer_class(queryset, many=True)
         total_registered_for_presentation = len(models.User.objects.filter(registered_for_presentations=True).all())
-        serializer.data['is_full'] = total_registered_for_presentation >= int(
-            models.Misc.objects.get(pk='presentation_cap').desc)
-        return Response(serializer.data)
+        response = list(serializer.data)
+        response.append(
+            {'is_full': total_registered_for_presentation >= int(models.Misc.objects.get(pk='presentation_cap').desc)})
+        return Response(response)
 
     def retrieve(self, request, pk=None):
         queryset = models.Presentation.objects.all()
