@@ -165,6 +165,7 @@ class PaymentAPIView(APIView):
                     total_price += workshop.cost
             if serializer.validated_data.get('presentations'):
                 total_price += int(get_object_or_404(models.Misc.objects.all(), pk='presentation_fee').desc)
+                presentation = True
 
             payment_init_data = {
                 'MerchantID': env.str('MERCHANT_ID'),
