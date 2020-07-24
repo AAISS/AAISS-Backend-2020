@@ -93,6 +93,25 @@ class Workshop(models.Model):
     teachers = models.ManyToManyField(Teacher)
     cost = models.PositiveIntegerField()
     desc = models.CharField(max_length=BIG_MAX_LENGTH)
+    has_project = models.BooleanField(default=False, blank=False)
+    prerequisites = models.CharField(max_length=BIG_MAX_LENGTH, default='')
+
+    NOT_ASSIGNED = 1
+    ELEMENTARY = 2
+    INTERMEDIATE = 3
+    ADVANCED = 4
+    options = [
+        (NOT_ASSIGNED, _('NOT_ASSIGNED')),
+        (ELEMENTARY, _('Elementary')),
+        (INTERMEDIATE, _('Intermediate')),
+        (ADVANCED, _('Advanced')),
+    ]
+    level = models.PositiveSmallIntegerField(
+        choices=options,
+        default=NOT_ASSIGNED,
+        blank=True
+    )
+
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
 
@@ -107,6 +126,23 @@ class Presentation(models.Model):
     name = models.CharField(max_length=SMALL_MAX_LENGTH)
     presenters = models.ManyToManyField(Presenter)
     desc = models.CharField(max_length=BIG_MAX_LENGTH)
+
+    NOT_ASSIGNED = 1
+    ELEMENTARY = 2
+    INTERMEDIATE = 3
+    ADVANCED = 4
+    options = [
+        (NOT_ASSIGNED, _('NOT_ASSIGNED')),
+        (ELEMENTARY, _('Elementary')),
+        (INTERMEDIATE, _('Intermediate')),
+        (ADVANCED, _('Advanced')),
+    ]
+    level = models.PositiveSmallIntegerField(
+        choices=options,
+        default=NOT_ASSIGNED,
+        blank=True
+    )
+
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
 
