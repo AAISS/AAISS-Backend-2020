@@ -20,7 +20,6 @@ def desc_creator(selected_model):
 
     class Admin(admin.ModelAdmin):
         form = AdminForm
-        list_display = ('name',)
 
     return Admin
 

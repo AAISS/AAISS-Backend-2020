@@ -114,6 +114,7 @@ class Presentation(models.Model):
         name = ""
         for presenter in self.presenters.all():
             name += presenter.name + " "
+        print(name)
         return f"{name}: {self.name}"
 
 
