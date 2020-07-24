@@ -43,7 +43,6 @@ class TeacherViewSet(viewsets.ViewSet):
         workshops = []
         for workshop in models.Workshop.objects.filter(teachers=teacher).all():
             workshops.append(workshop.id)
-        print(workshops)
         response = serializer.data
         response['workshops'] = workshops
         return Response(response)
@@ -64,7 +63,6 @@ class PresenterViewSet(viewsets.ViewSet):
         presentations = []
         for presentation in models.Presentation.objects.filter(presenters=presenter).all():
             presentations.append(presentation.id)
-        print(presentations)
         response = serializer.data
         response['presentations'] = presentations
         return Response(response)
@@ -76,6 +74,10 @@ class WorkshopViewSet(viewsets.ViewSet):
     def list(self, request, **kwargs):
         queryset = models.Workshop.objects.all()
         serializer = self.serializer_class(queryset, many=True)
+        for workshop_data in serializer.data:
+            workshop = get_object_or_404(queryset, pk=workshop_data['id'])
+            workshop_data['is_full'] = (
+                    len(models.User.objects.filter(registered_workshops=workshop).all()) >= workshop.capacity)
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
@@ -173,13 +175,27 @@ class PaymentAPIView(APIView):
                 return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
             workshop_queryset = models.Workshop.objects.all()
             workshops = []
+            full_workshops = []
             presentation = False
             total_price = 0
             if serializer.validated_data.get('workshops') is not None:
                 for pkid in serializer.validated_data.get('workshops'):
                     workshop = get_object_or_404(workshop_queryset, pk=pkid)
-                    workshops.append(workshop)
-                    total_price += workshop.cost
+                    if len(models.User.objects.filter(registered_workshops=workshop).all()) >= workshop.capacity:
+                        full_workshops.append(workshop.name)
+                    else:
+                        workshops.append(workshop)
+                        total_price += workshop.cost
+            if len(full_workshops) > 0:
+                return Response({'message': 'some are selected workshops are full', 'full_workshops': full_workshops},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            total_registered_for_presentation = len(models.User.objects.filter(registered_for_presentations=True).all())
+            print(total_registered_for_presentation, int(models.Misc.objects.get(pk='presentation_cap').desc), serializer.validated_data.get('presentations'))
+            if total_registered_for_presentation >= int(models.Misc.objects.get(
+                    pk='presentation_cap').desc) and serializer.validated_data.get('presentations'):
+                return Response({'message': 'Presentations are full'}, status=status.HTTP_400_BAD_REQUEST)
+
             if serializer.validated_data.get('presentations'):
                 total_price += int(get_object_or_404(models.Misc.objects.all(), pk='presentation_fee').desc)
                 presentation = True
@@ -201,9 +217,9 @@ class PaymentAPIView(APIView):
                                                         presentation=presentation, is_done=False, ref_id='')
                 payment.workshops.set(workshops)
                 payment.save()
-                return Response('https://www.zarinpal.com/pg/StartPay/' + str(zarin_response.Authority))
+                return Response({'message': 'https://www.zarinpal.com/pg/StartPay/' + str(zarin_response.Authority)})
             else:
-                return Response({'Payment Error with code: ' + zarin_response.Status},
+                return Response({'message': 'Payment Error with code: ' + str(zarin_response.Status)},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             return Response({'message': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)

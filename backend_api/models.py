@@ -95,6 +95,7 @@ class Workshop(models.Model):
     desc = models.CharField(max_length=BIG_MAX_LENGTH)
     has_project = models.BooleanField(default=False, blank=False)
     prerequisites = models.CharField(max_length=BIG_MAX_LENGTH, default='')
+    capacity = models.PositiveSmallIntegerField(default=50)
 
     NOT_ASSIGNED = 1
     ELEMENTARY = 2
