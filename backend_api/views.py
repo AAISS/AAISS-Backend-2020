@@ -93,6 +93,9 @@ class PresentationViewSet(viewsets.ViewSet):
     def list(self, request, **kwargs):
         queryset = models.Presentation.objects.all()
         serializer = self.serializer_class(queryset, many=True)
+        total_registered_for_presentation = len(models.User.objects.filter(registered_for_presentations=True).all())
+        serializer.data['is_full'] = total_registered_for_presentation >= int(
+            models.Misc.objects.get(pk='presentation_cap').desc)
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
@@ -191,7 +194,6 @@ class PaymentAPIView(APIView):
                                 status=status.HTTP_400_BAD_REQUEST)
 
             total_registered_for_presentation = len(models.User.objects.filter(registered_for_presentations=True).all())
-            print(total_registered_for_presentation, int(models.Misc.objects.get(pk='presentation_cap').desc), serializer.validated_data.get('presentations'))
             if total_registered_for_presentation >= int(models.Misc.objects.get(
                     pk='presentation_cap').desc) and serializer.validated_data.get('presentations'):
                 return Response({'message': 'Presentations are full'}, status=status.HTTP_400_BAD_REQUEST)
