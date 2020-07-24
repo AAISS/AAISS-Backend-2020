@@ -221,7 +221,7 @@ class PaymentAPIView(APIView):
             zarin_response = self.client.service.PaymentVerification(env.str('MERCHANT_ID'), authority,
                                                                      payment.total_price)
             if zarin_response.Status == 100:
-                payment.ref_id = zarin_response.RedID
+                payment.ref_id = zarin_response.RefID
                 payment.save()
                 return redirect(env.str('BASE_URL'))
             elif zarin_response.Status == 101:
