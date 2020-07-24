@@ -169,7 +169,7 @@ class PaymentAPIView(APIView):
                 'MerchantID': env.str('MERCHANT_ID'),
                 'Amount': total_price,
                 'Description': 'ثبت نام در کارگاه ها/ارائه های رخداد AAISS',
-                'CallbackURL': env.str('BASE_URL') + '/api/payment/'
+                'CallbackURL': env.str('BASE_URL') + 'api/payment/'
             }
 
             zarin_response = self.client.service.PaymentRequest(payment_init_data['MerchantID'],
