@@ -97,20 +97,21 @@ class Workshop(models.Model):
     prerequisites = models.CharField(max_length=BIG_MAX_LENGTH, default='', blank=True)
     capacity = models.PositiveSmallIntegerField(default=50)
 
-    NOT_ASSIGNED = 1
-    ELEMENTARY = 2
-    INTERMEDIATE = 3
-    ADVANCED = 4
+    NOT_ASSIGNED = 'NOT_ASSIGNED'
+    ELEMENTARY = 'Elementary'
+    INTERMEDIATE = 'Intermediate'
+    ADVANCED = 'Advanced'
     options = [
         (NOT_ASSIGNED, _('NOT_ASSIGNED')),
         (ELEMENTARY, _('Elementary')),
         (INTERMEDIATE, _('Intermediate')),
         (ADVANCED, _('Advanced')),
     ]
-    level = models.PositiveSmallIntegerField(
+    level = models.CharField(
         choices=options,
         default=NOT_ASSIGNED,
-        blank=True
+        blank=True,
+        max_length=15
     )
 
     start_date = models.DateTimeField()
@@ -128,20 +129,21 @@ class Presentation(models.Model):
     presenters = models.ManyToManyField(Presenter)
     desc = models.CharField(max_length=BIG_MAX_LENGTH)
 
-    NOT_ASSIGNED = 1
-    ELEMENTARY = 2
-    INTERMEDIATE = 3
-    ADVANCED = 4
+    NOT_ASSIGNED = 'NOT_ASSIGNED'
+    ELEMENTARY = 'Elementary'
+    INTERMEDIATE = 'Intermediate'
+    ADVANCED = 'Advanced'
     options = [
         (NOT_ASSIGNED, _('NOT_ASSIGNED')),
         (ELEMENTARY, _('Elementary')),
         (INTERMEDIATE, _('Intermediate')),
         (ADVANCED, _('Advanced')),
     ]
-    level = models.PositiveSmallIntegerField(
+    level = models.CharField(
         choices=options,
         default=NOT_ASSIGNED,
-        blank=True
+        blank=True,
+        max_length=15
     )
 
     start_date = models.DateTimeField()
