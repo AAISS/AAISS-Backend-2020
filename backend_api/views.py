@@ -244,6 +244,15 @@ class PaymentAPIView(APIView):
                                 status=status.HTTP_402_PAYMENT_REQUIRED)
 
             try:
+                zarin_response = self.client.service.PaymentVerification(env.str('MERCHANT_ID'), authority,
+                                                                         payment.total_price)
+                if zarin_response.Status == 100:
+                    payment.ref_id = zarin_response.RefID
+                    payment.save()
+                elif zarin_response.Status == 101:
+                    return redirect(env.str('BASE_URL'))
+                else:
+                    return redirect(env.str('BASE_URL'))
                 new_registered_workshops = []
                 for ws in payment.user.registered_workshops.all():
                     new_registered_workshops.append(ws)
@@ -255,19 +264,9 @@ class PaymentAPIView(APIView):
                 payment.user.save()
                 payment.is_done = True
                 payment.save()
+                return redirect(env.str('BASE_URL'))
             except Exception as e:
                 return Response({'message': 'تراکنش ناموفق بود', 'exception': e.__str__()},
                                 status=status.HTTP_402_PAYMENT_REQUIRED)
-
-            zarin_response = self.client.service.PaymentVerification(env.str('MERCHANT_ID'), authority,
-                                                                     payment.total_price)
-            if zarin_response.Status == 100:
-                payment.ref_id = zarin_response.RefID
-                payment.save()
-                return redirect(env.str('BASE_URL'))
-            elif zarin_response.Status == 101:
-                return redirect(env.str('BASE_URL'))
-            else:
-                return redirect(env.str('BASE_URL'))
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
