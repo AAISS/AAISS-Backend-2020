@@ -34,7 +34,9 @@ class TeacherViewSet(viewsets.ViewSet):
             teacher_data['workshops'] = dict()
             for workshop in models.Workshop.objects.filter(teachers=teacher).all():
                 teacher_data['workshops'][workshop.id] = workshop.name
-        return Response(serializer.data)
+        response = list(serializer.data)
+        response.sort(key=lambda k: k['order'])
+        return Response(response)
 
     def retrieve(self, request, pk=None):
         queryset = models.Teacher.objects.all()
@@ -54,7 +56,9 @@ class PresenterViewSet(viewsets.ViewSet):
     def list(self, request, **kwargs):
         queryset = models.Presenter.objects.all()
         serializer = self.serializer_class(queryset, many=True)
-        return Response(serializer.data)
+        response = list(serializer.data)
+        response.sort(key=lambda k: k['order'])
+        return Response(response)
 
     def retrieve(self, request, pk=None):
         queryset = models.Presenter.objects.all()
