@@ -1,8 +1,7 @@
 import threading
 
 from django import forms
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
 from django.utils.html import strip_tags
 from django.contrib import admin
 
@@ -79,12 +78,18 @@ class MailerThread(threading.Thread):
 
     def run(self):
         html_message = self.HTML_body
-        plain_message = strip_tags(html_message)
         print('STARTING TO SEND MAILS')
         print(self.targets)
-        send_mail(subject=self.subject, message=plain_message, from_email=settings.EMAIL_HOST_USER,
-                  recipient_list=self.targets, html_message=html_message,
-                  fail_silently=False)
+
+        email = EmailMessage(
+            subject=self.subject,
+            body=html_message,
+            from_email="AUT CE AAISS",
+            bcc=self.targets,
+            reply_to=(settings.EMAIL_HOST_USER,)
+        )
+        email.content_subtype = "html"
+        email.send(fail_silently=False)
         print("SENDING DONE")
 
 
@@ -110,7 +115,7 @@ class MailerAdmin(admin.ModelAdmin):
                 MailerThread(mailer.subject, mails, mailer.HTML_body).start()
             elif mailer.target_mode == 2:
                 mails = []
-                for workshop in mailer.workshop_selection:
+                for workshop in mailer.workshop_selection.all():
                     for user in models.User.objects.all():
                         if workshop in user.registered_workshops.all():
                             if __name__ == '__main__':
@@ -123,7 +128,7 @@ class MailerAdmin(admin.ModelAdmin):
                         mails.append(user.account.email)
                 MailerThread(mailer.subject, mails, mailer.HTML_body).start()
             elif mailer.target_mode == 4:
-                targets = mailer.user_selection
+                targets = mailer.user_selection.all()
                 mails = []
                 for target in targets:
                     mails.append(target.account.email)
