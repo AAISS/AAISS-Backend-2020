@@ -84,7 +84,7 @@ class MailerThread(threading.Thread):
         email = EmailMessage(
             subject=self.subject,
             body=html_message,
-            from_email="AUT CE AAISS",
+            from_email=settings.EMAIL_HOST_USER,
             bcc=self.targets,
             reply_to=(settings.EMAIL_HOST_USER,)
         )
