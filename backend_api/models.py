@@ -167,8 +167,6 @@ class User(models.Model):
     registered_workshops = models.ManyToManyField(Workshop, blank=True)
     registered_for_presentations = models.BooleanField(default=False)
     phone_number = models.CharField(max_length=12, validators=[validators.validate_all_number])
-    national_code = models.CharField(max_length=10,
-                                     validators=[RegexValidator(regex='^.{10}$', message='Length has to be 10')])
 
     def __str__(self):
         return f"{self.account}"
