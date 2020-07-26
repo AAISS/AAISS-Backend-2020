@@ -154,7 +154,6 @@ class UserAPIView(APIView):
                 account=account,
                 name=serializer.validated_data.get('name'),
                 phone_number=serializer.validated_data.get('phone_number'),
-                national_code=serializer.validated_data.get('national_code'),
             )
             user.fields_of_interest.set(fois)
             user.registered_workshops.set([])
