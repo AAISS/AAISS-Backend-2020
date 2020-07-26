@@ -240,10 +240,9 @@ class PaymentAPIView(APIView):
             try:
                 payment = models.Payment.objects.get(pk=authority)
             except:
-                return Response(status=status.HTTP_404_NOT_FOUND)
+                return redirect(env.str('BASE_URL') + '/notsuccessful')
             if zarin_status != 'OK':
-                return Response({'message': 'تراکنش ناموفق بود', 'type': 'status not ok'},
-                                status=status.HTTP_402_PAYMENT_REQUIRED)
+                return redirect(env.str('BASE_URL') + '/notsuccessful')
 
             try:
                 zarin_response = self.client.service.PaymentVerification(env.str('MERCHANT_ID'), authority,
@@ -252,9 +251,9 @@ class PaymentAPIView(APIView):
                     payment.ref_id = zarin_response.RefID
                     payment.save()
                 elif zarin_response.Status == 101:
-                    return redirect(env.str('BASE_URL'))
+                    return redirect(env.str('BASE_URL') + '/successful')
                 else:
-                    return redirect(env.str('BASE_URL'))
+                    return redirect(env.str('BASE_URL') + '/notsuccessful')
                 new_registered_workshops = []
                 for ws in payment.user.registered_workshops.all():
                     new_registered_workshops.append(ws)
@@ -266,9 +265,8 @@ class PaymentAPIView(APIView):
                 payment.user.save()
                 payment.is_done = True
                 payment.save()
-                return redirect(env.str('BASE_URL'))
+                return redirect(env.str('BASE_URL') + '/successful')
             except Exception as e:
-                return Response({'message': 'تراکنش ناموفق بود', 'exception': e.__str__()},
-                                status=status.HTTP_402_PAYMENT_REQUIRED)
+                return redirect(env.str('BASE_URL') + '/notsuccessful')
         else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return redirect(env.str('BASE_URL') + '/notsuccessful')
