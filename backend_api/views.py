@@ -162,7 +162,7 @@ class UserAPIView(APIView):
 
             return Response({'message': 'User created'})
 
-        return Response({serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PaymentAPIView(APIView):

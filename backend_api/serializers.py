@@ -26,9 +26,6 @@ class UserSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255, required=True)
     fields_of_interest = serializers.ListField(child=serializers.IntegerField(min_value=0), required=False)
     phone_number = serializers.CharField(max_length=12, validators=[validators.validate_all_number], required=True)
-    national_code = serializers.CharField(max_length=10,
-                                          validators=[RegexValidator(regex='^.{10}$', message='Length has to be 10')],
-                                          required=True)
 
 
 class PaymentInitSerialier(serializers.Serializer):
