@@ -88,7 +88,10 @@ class WorkshopViewSet(viewsets.ViewSet):
         queryset = models.Workshop.objects.all()
         workshop = get_object_or_404(queryset, pk=pk)
         serializer = self.serializer_class(workshop)
-        return Response(serializer.data)
+        response = dict(serializer.data)
+        response['is_full'] = (
+                len(models.User.objects.filter(registered_workshops=workshop).all()) >= workshop.capacity)
+        return Response(response)
 
 
 class PresentationViewSet(viewsets.ViewSet):
