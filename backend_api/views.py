@@ -1,5 +1,7 @@
+import base64
+import json
+
 from django.db.utils import IntegrityError
-from django.core import serializers as ds
 from django.shortcuts import get_object_or_404, redirect
 
 from rest_framework.views import APIView
@@ -246,8 +248,10 @@ class PaymentAPIView(APIView):
             try:
                 payment = models.Payment.objects.get(pk=authority)
             except:
+                print('no payment found')
                 return redirect(env.str('BASE_URL') + 'notsuccessful')
             if zarin_status != 'OK':
+                print('status not ok')
                 return redirect(env.str('BASE_URL') + 'notsuccessful')
 
             try:
@@ -257,8 +261,17 @@ class PaymentAPIView(APIView):
                     payment.ref_id = zarin_response.RefID
                     payment.save()
                 elif zarin_response.Status == 101:
-                    return redirect(env.str('BASE_URL') + 'successful')
+                    response_data = dict()
+                    user_workshops = dict()
+                    for workshop in payment.user.registered_workshops.all():
+                        user_workshops[workshop.id] = workshop.name
+                    response_data['workshops'] = user_workshops
+                    response_data['presentation'] = payment.user.registered_for_presentations
+                    json_res = json.dumps(response_data)
+                    encoded = base64.encodebytes(json_res.encode('UTF-8'))
+                    return redirect(env.str('BASE_URL') + 'successful' + '?data=' + encoded.__str__())
                 else:
+                    print('zarin status not success')
                     return redirect(env.str('BASE_URL') + 'notsuccessful')
                 new_registered_workshops = []
                 for ws in payment.user.registered_workshops.all():
@@ -271,8 +284,18 @@ class PaymentAPIView(APIView):
                 payment.user.save()
                 payment.is_done = True
                 payment.save()
-                return redirect(env.str('BASE_URL') + 'successful')
+                response_data = dict()
+                user_workshops = dict()
+                for workshop in payment.user.registered_workshops.all():
+                    user_workshops[workshop.id] = workshop.name
+                response_data['workshops'] = user_workshops
+                response_data['presentation'] = payment.user.registered_for_presentations
+                json_res = json.dumps(response_data)
+                encoded = base64.encodebytes(json_res.encode('UTF-8'))
+                return redirect(env.str('BASE_URL') + 'successful' + '?data=' + encoded.__str__())
             except Exception as e:
+                print('ridam', e.__str__())
                 return redirect(env.str('BASE_URL') + 'notsuccessful')
         else:
+            print('am i a joke to you?')
             return redirect(env.str('BASE_URL') + 'notsuccessful')
