@@ -151,7 +151,13 @@ class UserAPIView(APIView):
                     password='nothing'
                 )
             except IntegrityError:
-                return Response({"message": "User already exist"}, status=status.HTTP_202_ACCEPTED)
+                user = models.User.objects.get(account__email=serializer.validated_data.get('email'))
+                user_workshops = []
+                for workshop in user.registered_workshops.all():
+                    user_workshops.append(workshop.id)
+
+                return Response({"message": "User already exist", 'workshops': user_workshops,
+                                 'presentations': user.registered_for_presentations}, status=status.HTTP_202_ACCEPTED)
             account.save()
             user = models.User.objects.create(
                 account=account,
