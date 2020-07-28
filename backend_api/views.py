@@ -14,6 +14,7 @@ from zeep import Client
 from aaiss_backend.settings import env
 from backend_api import models
 from backend_api import serializers
+from backend_api.admin import MailerThread
 
 
 class FieldOfInterestViewSet(viewsets.ViewSet):
@@ -175,6 +176,25 @@ class UserAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+def send_register_email(user, workshops, presentation):
+    subject = 'AAISS registration'
+    body = f"Dear {user.name}\n"
+    if presentation:
+        body += 'You successfully registered for presentations'
+        if len(workshops) != 0:
+            body += 'and following workshops:\n'
+    elif len(workshops) != 0:
+        body += 'You successfully registered for and following workshops:\n'
+
+    if len(workshops) != 0:
+        for (i, workshop) in enumerate(workshops):
+            body += f'{i + 1}: {workshop.name}\n'
+
+    body += "\n\nBest regards, AAISS team."
+
+    MailerThread(subject=subject, targets=[user.account.email], html_body=body).start()
+
+
 class PaymentAPIView(APIView):
     serializer_class = serializers.PaymentInitSerialier
     client = Client('https://www.zarinpal.com/pg/services/WebGate/wsdl')
@@ -292,9 +312,11 @@ class PaymentAPIView(APIView):
                 response_data['presentation'] = payment.user.registered_for_presentations
                 json_res = json.dumps(response_data)
                 encoded = base64.encodebytes(json_res.encode('UTF-8'))
+                send_register_email(user=payment.user, workshops=payment.workshops.all(),
+                                    presentation=payment.presentation)
                 return redirect(env.str('BASE_URL') + 'successful' + '?data=' + encoded.decode('UTF-8'))
             except Exception as e:
-                print('ridam', e.__str__())
+                print('Exception: ', e.__str__())
                 return redirect(env.str('BASE_URL') + 'notsuccessful')
         else:
             print('am i a joke to you?')
