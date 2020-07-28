@@ -19,7 +19,10 @@ def desc_creator(selected_model):
 
     class Admin(admin.ModelAdmin):
         form = AdminForm
-
+        if selected_model == models.Workshop:
+            list_display = ('__str__', 'capacity', 'cost', 'has_project', 'level')
+        elif selected_model == models.Presentation:
+            list_display = ('__str__', 'level')
     return Admin
 
 
@@ -44,6 +47,7 @@ class TeacherAdminForm(forms.ModelForm):
 
 class TeacherAdmin(admin.ModelAdmin):
     form = TeacherAdminForm
+    list_display = ('__str__', 'order',)
 
 
 admin.site.register(models.Teacher, TeacherAdmin)
@@ -60,7 +64,7 @@ class PresenterAdminForm(forms.ModelForm):
 
 class PresenterAdmin(admin.ModelAdmin):
     form = PresenterAdminForm
-    list_display = ('name',)
+    list_display = ('__str__', 'order',)
 
 
 admin.site.register(models.Presenter, PresenterAdmin)
