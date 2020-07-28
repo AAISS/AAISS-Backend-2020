@@ -269,7 +269,7 @@ class PaymentAPIView(APIView):
                     response_data['presentation'] = payment.user.registered_for_presentations
                     json_res = json.dumps(response_data)
                     encoded = base64.encodebytes(json_res.encode('UTF-8'))
-                    return redirect(env.str('BASE_URL') + 'successful' + '?data=' + encoded.__str__())
+                    return redirect(env.str('BASE_URL') + 'successful' + '?data=' + encoded.decode('UTF-8'))
                 else:
                     print('zarin status not success')
                     return redirect(env.str('BASE_URL') + 'notsuccessful')
@@ -292,7 +292,7 @@ class PaymentAPIView(APIView):
                 response_data['presentation'] = payment.user.registered_for_presentations
                 json_res = json.dumps(response_data)
                 encoded = base64.encodebytes(json_res.encode('UTF-8'))
-                return redirect(env.str('BASE_URL') + 'successful' + '?data=' + encoded.__str__())
+                return redirect(env.str('BASE_URL') + 'successful' + '?data=' + encoded.decode('UTF-8'))
             except Exception as e:
                 print('ridam', e.__str__())
                 return redirect(env.str('BASE_URL') + 'notsuccessful')
