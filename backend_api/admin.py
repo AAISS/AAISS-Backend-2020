@@ -151,13 +151,13 @@ class PaymentAdmin(admin.ModelAdmin):
     for field in models.Payment._meta.get_fields():
         rdfields.append(field.__str__().split('.')[-1])
 
-    # readonly_fields = rdfields
+    readonly_fields = rdfields
 
-    # def has_add_permission(self, request):
-    #     return False
+    def has_add_permission(self, request):
+        return False
 
-    # def has_delete_permission(self, request, obj=None):
-    #     return False
+    def has_delete_permission(self, request, obj=None):
+        return False
 
     class Meta:
         model = models.Payment
