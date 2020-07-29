@@ -178,19 +178,21 @@ class UserAPIView(APIView):
 
 def send_register_email(user, workshops, presentation):
     subject = 'AAISS registration'
-    body = f"Dear {user.name}\n"
+    body = f"Dear {user.name},\n<br>\n"
     if presentation:
         body += 'You successfully registered for presentations'
         if len(workshops) != 0:
-            body += 'and following workshops:\n'
+            body += 'and following workshops:\n<br>\n'
+        else:
+            body += '.\n<br>\n'
     elif len(workshops) != 0:
-        body += 'You successfully registered for following workshops:\n'
+        body += 'You successfully registered for following workshops:\n<br>\n'
 
     if len(workshops) != 0:
         for (i, workshop) in enumerate(workshops):
-            body += f'{i + 1}: {workshop.name}\n'
+            body += f'{i + 1}: {workshop.name}\n<br>'
 
-    body += "\n\nBest regards, AAISS team."
+    body += "\n<br>\n<br>\nBest regards, AAISS team."
 
     MailerThread(subject=subject, targets=[user.account.email], html_body=body).start()
 
