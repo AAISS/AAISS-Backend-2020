@@ -98,6 +98,7 @@ class Workshop(models.Model):
     has_project = models.BooleanField(default=False, blank=False)
     prerequisites = models.CharField(max_length=BIG_MAX_LENGTH, default='', blank=True)
     capacity = models.PositiveSmallIntegerField(default=50)
+    add_to_calendar_link = models.CharField(max_length=SMALL_MAX_LENGTH, default='', blank=True)
 
     NOT_ASSIGNED = 'NOT_ASSIGNED'
     ELEMENTARY = 'Elementary'

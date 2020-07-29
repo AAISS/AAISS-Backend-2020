@@ -190,7 +190,10 @@ def send_register_email(user, workshops, presentation):
 
     if len(workshops) != 0:
         for (i, workshop) in enumerate(workshops):
-            body += f'{i + 1}: {workshop.name}\n<br>'
+            body += f'{i + 1}: {workshop.name}'
+            if workshop.add_to_calendar_link is not None and workshop.add_to_calendar_link != '':
+                body += f' <a href="{workshop.add_to_calendar_link}">Add to calendar</a>'
+            body += '\n<br>\n'
 
     body += "\n<br>\n<br>\nBest regards, AAISS team."
 
