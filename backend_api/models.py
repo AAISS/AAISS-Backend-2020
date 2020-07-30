@@ -162,6 +162,16 @@ class Presentation(models.Model):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
 
+    def no_of_participants(self):
+        return len(User.objects.filter(registered_for_presentations=True).all())
+
+    @property
+    def participants(self):
+        users = []
+        for user in User.objects.filter(registered_for_presentations=True).all():
+            users.append(user)
+        return users
+
     def __str__(self):
         name = ""
         for presenter in self.presenters.all():
