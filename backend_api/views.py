@@ -182,7 +182,7 @@ def send_register_email(user, workshops, presentation):
     if presentation:
         body += 'You successfully registered for presentations'
         if len(workshops) != 0:
-            body += 'and following workshops:\n<br>\n'
+            body += ' and following workshops:\n<br>\n'
         else:
             body += '.\n<br>\n'
     elif len(workshops) != 0:

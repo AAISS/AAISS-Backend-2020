@@ -20,7 +20,8 @@ def desc_creator(selected_model):
     class Admin(admin.ModelAdmin):
         form = AdminForm
         if selected_model == models.Workshop:
-            list_display = ('__str__', 'capacity', 'cost', 'has_project', 'level')
+            list_display = ('__str__', 'capacity', 'cost', 'has_project', 'level', 'no_of_participants')
+            readonly_fields = ('participants',)
         elif selected_model == models.Presentation:
             list_display = ('__str__', 'level')
     return Admin

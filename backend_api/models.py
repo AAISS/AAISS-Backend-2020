@@ -120,6 +120,16 @@ class Workshop(models.Model):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
 
+    def no_of_participants(self):
+        return len(User.objects.filter(registered_workshops=self).all())
+
+    @property
+    def participants(self):
+        users = []
+        for user in User.objects.filter(registered_workshops=self).all():
+            users.append(user)
+        return users
+
     def __str__(self):
         name = ""
         for teacher in self.teachers.all():
