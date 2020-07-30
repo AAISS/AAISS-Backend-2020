@@ -154,8 +154,10 @@ class UserAPIView(APIView):
                     password='nothing'
                 )
             except IntegrityError:
-                a = str('an').lower()
-                user = models.User.objects.get(account__email=(str(serializer.validated_data.get('email')).lower()))
+                try:
+                    user = models.User.objects.get(account__email=(str(serializer.validated_data.get('email')).lower()))
+                except:
+                    return Response(str(serializer.validated_data.get('email')).lower())
                 user_workshops = []
                 for workshop in user.registered_workshops.all():
                     user_workshops.append(workshop.id)
