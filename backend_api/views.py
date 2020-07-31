@@ -135,7 +135,29 @@ class UserAPIView(APIView):
     serializer_class = serializers.UserSerializer
 
     def get(self, request):
-        return Response({'GET': 'GET'})
+        print(request.META)
+        if request.META['HTTP_DAUTH'] == env.str('DISCORD_TOKEN'):
+            users = []
+            for model_user in models.User.objects.all():
+                user = dict()
+                user['email'] = model_user.account.email
+                user['presentation'] = model_user.registered_for_presentations
+                user['name'] = model_user.name
+                user['fields_of_interest'] = []
+                for model_foi in model_user.fields_of_interest.all():
+                    foi = dict()
+                    foi['name'] = model_foi.name
+                    user['fields_of_interest'].append(foi)
+
+                user['workshops'] = []
+                for model_workshop in model_user.registered_workshops.all():
+                    workshop = dict()
+                    workshop['name'] = model_workshop.name
+                    user['workshops'].append(workshop)
+                users.append(user)
+            return Response({'users': users})
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
