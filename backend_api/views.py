@@ -134,7 +134,7 @@ class MiscViewSet(viewsets.ViewSet):
 class UserAPIView(APIView):
     serializer_class = serializers.UserSerializer
 
-    def get(self, request, pk, format=None):
+    def get(self, request, pk=None, format=None):
         if request.META.get('HTTP_DAUTH') == env.str('DISCORD_TOKEN'):
             try:
                 model_user = models.User.objects.get(account__email=(pk.lower()))
