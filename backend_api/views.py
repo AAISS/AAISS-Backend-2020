@@ -134,28 +134,29 @@ class MiscViewSet(viewsets.ViewSet):
 class UserAPIView(APIView):
     serializer_class = serializers.UserSerializer
 
-    def get(self, request):
-        print(request.META)
-        if request.META['HTTP_DAUTH'] == env.str('DISCORD_TOKEN'):
-            users = []
-            for model_user in models.User.objects.all():
-                user = dict()
-                user['email'] = model_user.account.email
-                user['presentation'] = model_user.registered_for_presentations
-                user['name'] = model_user.name
-                user['fields_of_interest'] = []
-                for model_foi in model_user.fields_of_interest.all():
-                    foi = dict()
-                    foi['name'] = model_foi.name
-                    user['fields_of_interest'].append(foi)
+    def get(self, request, pk, format=None):
+        if request.META.get('HTTP_DAUTH') == env.str('DISCORD_TOKEN'):
+            try:
+                model_user = models.User.objects.get(account__email=(pk.lower()))
+            except KeyError as e:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+            user = dict()
+            user['email'] = model_user.account.email
+            user['presentation'] = model_user.registered_for_presentations
+            user['name'] = model_user.name
+            user['fields_of_interest'] = []
+            for model_foi in model_user.fields_of_interest.all():
+                foi = dict()
+                foi['name'] = model_foi.name
+                user['fields_of_interest'].append(foi)
 
-                user['workshops'] = []
-                for model_workshop in model_user.registered_workshops.all():
-                    workshop = dict()
-                    workshop['name'] = model_workshop.name
-                    user['workshops'].append(workshop)
-                users.append(user)
-            return Response({'users': users})
+            user['workshops'] = []
+            for model_workshop in model_user.registered_workshops.all():
+                workshop = dict()
+                workshop['name'] = model_workshop.name
+                user['workshops'].append(workshop)
+
+            return Response({'user': user})
         else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 

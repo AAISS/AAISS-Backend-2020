@@ -21,5 +21,6 @@ router.register('misc', views.MiscViewSet, basename='misc')
 urlpatterns = [
     path('', include(router.urls)),
     path('user/', views.UserAPIView.as_view()),
+    path(r'user/<pk>/', views.UserAPIView.as_view()),
     path('payment/', views.PaymentAPIView.as_view()),
 ]
