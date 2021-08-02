@@ -14,28 +14,28 @@ router = OptionalSlashRouter()
 router.register('foi', views.FieldOfInterestViewSet, basename='field_of_interest')
 
 teacher_routes = [
-    path(r'teacher/<int:year>/', views.TeacherViewSet.as_view({'get': 'list'})),
-    path(r'teacher/<int:year>/<pk>/', views.TeacherViewSet.as_view({'get': 'retrieve'})),
+    path(r'<int:year>/teacher/', views.TeacherViewSet.as_view({'get': 'list'})),
+    path(r'<int:year>/teacher/<pk>/', views.TeacherViewSet.as_view({'get': 'retrieve'})),
 ]
 
 presenter_route = [
-    path(r'presenter/<int:year>/', views.PresenterViewSet.as_view({'get': 'list'})),
-    path(r'presenter/<int:year>/<pk>/', views.PresenterViewSet.as_view({'get': 'retrieve'})),
+    path(r'<int:year>/presenter/', views.PresenterViewSet.as_view({'get': 'list'})),
+    path(r'<int:year>/presenter/<pk>/', views.PresenterViewSet.as_view({'get': 'retrieve'})),
 ]
 
 presentation_route = [
-    path(r'presentation/<int:year>/', views.PresentationViewSet.as_view({'get': 'list'})),
-    path(r'presentation/<int:year>/<pk>/', views.PresentationViewSet.as_view({'get': 'retrieve'})),
+    path(r'<int:year>/presentation/', views.PresentationViewSet.as_view({'get': 'list'})),
+    path(r'<int:year>/presentation/<pk>/', views.PresentationViewSet.as_view({'get': 'retrieve'})),
 ]
 
 workshop_route = [
-    path(r'workshop/<int:year>/', views.WorkshopViewSet.as_view({'get': 'list'})),
-    path(r'workshop/<int:year>/<pk>/', views.WorkshopViewSet.as_view({'get': 'retrieve'})),
+    path(r'<int:year>/workshop/', views.WorkshopViewSet.as_view({'get': 'list'})),
+    path(r'<int:year>/workshop/<pk>/', views.WorkshopViewSet.as_view({'get': 'retrieve'})),
 ]
 
 misc_route = [
-    path(r'misc/<int:year>/', views.MiscViewSet.as_view({'get': 'list'})),
-    path(r'misc/<int:year>/<pk>/', views.MiscViewSet.as_view({'get': 'retrieve'})),
+    path(r'<int:year>/misc/', views.MiscViewSet.as_view({'get': 'list'})),
+    path(r'<int:year>/misc/<pk>/', views.MiscViewSet.as_view({'get': 'retrieve'})),
 ]
 
 
