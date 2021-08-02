@@ -249,3 +249,14 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment for {self.user.account} ({self.total_price})  in {str(self.date)}"
+
+
+class Staff(models.Model):
+    profile = models.ImageField(verbose_name='profile', null=True, blank=True)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    year = models.IntegerField(blank=False, default=2020)
+    entrance = models.IntegerField(blank=True)
+
+    def __str__(self):
+        return  self.first_name+' '+self.last_name +' '+str(self.entrance)

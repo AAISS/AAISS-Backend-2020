@@ -34,7 +34,7 @@ admin.site.register(models.Account)
 class UserAdmin(admin.ModelAdmin):
     list_display = ('account',)
 
-
+admin.site.register(models.Staff)
 admin.site.register(models.User, UserAdmin)
 admin.site.register(models.FieldOfInterest)
 

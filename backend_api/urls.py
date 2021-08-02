@@ -13,6 +13,10 @@ class OptionalSlashRouter(DefaultRouter):
 router = OptionalSlashRouter()
 router.register('foi', views.FieldOfInterestViewSet, basename='field_of_interest')
 
+staff_routes = [
+    path(r'<int:year>/staff/', views.StaffViewSet.as_view({'get': 'list'})),
+]
+
 teacher_routes = [
     path(r'<int:year>/teacher/', views.TeacherViewSet.as_view({'get': 'list'})),
     path(r'<int:year>/teacher/<pk>/', views.TeacherViewSet.as_view({'get': 'retrieve'})),
@@ -47,6 +51,7 @@ urlpatterns = [
     path('', include(presentation_route)),
     path('', include(workshop_route)),
     path('', include(misc_route)),
+    path('', include(staff_routes)),
     path('user/', views.UserAPIView.as_view()),
     path(r'user/<pk>/', views.UserAPIView.as_view()),
     path('payment/', views.PaymentAPIView.as_view()),

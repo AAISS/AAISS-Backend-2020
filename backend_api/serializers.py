@@ -19,6 +19,7 @@ PresenterSerializer = all_serializer_creator(models.Presenter)
 WorkshopSerializer = all_serializer_creator(models.Workshop)
 PresentationSerializer = all_serializer_creator(models.Presentation)
 MiscSerializer = all_serializer_creator(models.Misc)
+StaffSerializer = all_serializer_creator(models.Staff)
 
 
 class UserSerializer(serializers.Serializer):

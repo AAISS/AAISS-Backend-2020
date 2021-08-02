@@ -26,6 +26,14 @@ class FieldOfInterestViewSet(viewsets.ViewSet):
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)
 
+class StaffViewSet(viewsets.ViewSet):
+    serializer_class = serializers.StaffSerializer
+
+    def list(self, request, **kwargs):
+        queryset = models.Staff.objects.all()
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data)
+
 
 class TeacherViewSet(viewsets.ViewSet):
     serializer_class = serializers.TeacherSerializer
