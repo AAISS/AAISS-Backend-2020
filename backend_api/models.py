@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
@@ -71,6 +73,7 @@ class Teacher(models.Model):
     cv_path = models.CharField(max_length=511, blank=True, default="")
     bio = models.CharField(max_length=BIG_MAX_LENGTH)
     order = models.SmallIntegerField(default=0)
+    year = models.IntegerField(blank=False, default=2020)
 
     def __str__(self):
         return f"Teacher with id {self.id}: {self.name}"
@@ -85,9 +88,10 @@ class Presenter(models.Model):
     cv_path = models.CharField(max_length=511, blank=True, default="")
     bio = models.CharField(max_length=BIG_MAX_LENGTH)
     order = models.SmallIntegerField(default=0)
+    year = models.IntegerField(blank=False, default=2020)
 
     def __str__(self):
-        return f"Presenter with id {self.id}: {self.name}"
+        return f"Presenter with id {self.id}: {self.name}==> {self.year}"
 
 
 class Workshop(models.Model):
@@ -99,6 +103,7 @@ class Workshop(models.Model):
     prerequisites = models.CharField(max_length=BIG_MAX_LENGTH, default='', blank=True)
     capacity = models.PositiveSmallIntegerField(default=50)
     add_to_calendar_link = models.CharField(max_length=SMALL_MAX_LENGTH, default='', blank=True)
+    year = models.IntegerField(blank=False, default=2020)
 
     NOT_ASSIGNED = 'NOT_ASSIGNED'
     ELEMENTARY = 'Elementary'
@@ -141,6 +146,7 @@ class Presentation(models.Model):
     name = models.CharField(max_length=SMALL_MAX_LENGTH)
     presenters = models.ManyToManyField(Presenter)
     desc = models.CharField(max_length=BIG_MAX_LENGTH)
+    year = models.IntegerField(blank=False, default=2020)
 
     NOT_ASSIGNED = 'NOT_ASSIGNED'
     ELEMENTARY = 'Elementary'
@@ -197,6 +203,7 @@ class Misc(models.Model):
     name = models.CharField(max_length=SMALL_MAX_LENGTH, primary_key=True)
     desc = models.CharField(max_length=BIG_MAX_LENGTH, blank=True)
     pic = models.ImageField(blank=True)
+    year = models.IntegerField(blank=False, default=2020)
 
     def __str__(self):
         return f"Misc with name {self.name}"
@@ -235,6 +242,10 @@ class Payment(models.Model):
     presentation = models.BooleanField(default=False, blank=True)
     is_done = models.BooleanField(default=False)
     ref_id = models.CharField(default='', max_length=SMALL_MAX_LENGTH)
+    year = models.IntegerField(blank=False, default=2020)
+    date = models.DateField(blank=False,
+                            default=datetime.datetime(year=2020, month=7, day=1, hour=0, minute=0, second=0,
+                                                      microsecond=0))
 
     def __str__(self):
-        return f"Payment for {self.user.account}"
+        return f"Payment for {self.user.account} ({self.total_price})  in {str(self.date)}"

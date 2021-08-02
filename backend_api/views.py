@@ -1,4 +1,5 @@
 import base64
+import datetime
 import json
 
 from django.db.utils import IntegrityError
@@ -29,8 +30,9 @@ class FieldOfInterestViewSet(viewsets.ViewSet):
 class TeacherViewSet(viewsets.ViewSet):
     serializer_class = serializers.TeacherSerializer
 
-    def list(self, request, **kwargs):
-        queryset = models.Teacher.objects.all()
+    def list(self, request, year=None, **kwargs):
+        print('YEAAAR ', year)
+        queryset = models.Teacher.objects.filter(year=year)
         serializer = self.serializer_class(queryset, many=True)
         for teacher_data in serializer.data:
             teacher = get_object_or_404(queryset, pk=teacher_data['id'])
@@ -41,8 +43,11 @@ class TeacherViewSet(viewsets.ViewSet):
         response.sort(key=lambda k: k['order'])
         return Response(response)
 
-    def retrieve(self, request, pk=None):
-        queryset = models.Teacher.objects.all()
+    def retrieve(self, request, year=None, pk=None):
+        print('YEAAAR ', year)
+        if year is None:
+            year = datetime.datetime.now().year
+        queryset = models.Teacher.objects.filter(year=year)
         teacher = get_object_or_404(queryset, pk=pk)
         serializer = self.serializer_class(teacher)
         workshops = []
@@ -56,15 +61,19 @@ class TeacherViewSet(viewsets.ViewSet):
 class PresenterViewSet(viewsets.ViewSet):
     serializer_class = serializers.PresenterSerializer
 
-    def list(self, request, **kwargs):
-        queryset = models.Presenter.objects.all()
+    def list(self, request, year=None, **kwargs):
+        if year is None:
+            year = datetime.datetime.now().year
+        queryset = models.Presenter.objects.filter(year=year)
         serializer = self.serializer_class(queryset, many=True)
         response = list(serializer.data)
         response.sort(key=lambda k: k['order'])
         return Response(response)
 
-    def retrieve(self, request, pk=None):
-        queryset = models.Presenter.objects.all()
+    def retrieve(self, request, year=None, pk=None):
+        if year is None:
+            year = datetime.datetime.now().year
+        queryset = models.Presenter.objects.filter(year=year)
         presenter = get_object_or_404(queryset, pk=pk)
         serializer = self.serializer_class(presenter)
         presentations = []
@@ -78,8 +87,10 @@ class PresenterViewSet(viewsets.ViewSet):
 class WorkshopViewSet(viewsets.ViewSet):
     serializer_class = serializers.WorkshopSerializer
 
-    def list(self, request, **kwargs):
-        queryset = models.Workshop.objects.all()
+    def list(self, request, year=None, **kwargs):
+        if year is None:
+            year = datetime.datetime.now().year
+        queryset = models.Workshop.objects.filter(year=year)
         serializer = self.serializer_class(queryset, many=True)
         for workshop_data in serializer.data:
             workshop = get_object_or_404(queryset, pk=workshop_data['id'])
@@ -87,8 +98,10 @@ class WorkshopViewSet(viewsets.ViewSet):
                     len(models.User.objects.filter(registered_workshops=workshop).all()) >= workshop.capacity)
         return Response(serializer.data)
 
-    def retrieve(self, request, pk=None):
-        queryset = models.Workshop.objects.all()
+    def retrieve(self, request, year=None, pk=None):
+        if year is None:
+            year = datetime.datetime.now().year
+        queryset = models.Workshop.objects.filter(year=year)
         workshop = get_object_or_404(queryset, pk=pk)
         serializer = self.serializer_class(workshop)
         response = dict(serializer.data)
@@ -100,8 +113,10 @@ class WorkshopViewSet(viewsets.ViewSet):
 class PresentationViewSet(viewsets.ViewSet):
     serializer_class = serializers.PresentationSerializer
 
-    def list(self, request, **kwargs):
-        queryset = models.Presentation.objects.all()
+    def list(self, request, year=None, **kwargs):
+        if year is None:
+            year = datetime.datetime.now().year
+        queryset = models.Presentation.objects.filter(year=year)
         serializer = self.serializer_class(queryset, many=True)
         total_registered_for_presentation = len(models.User.objects.filter(registered_for_presentations=True).all())
         response = list(serializer.data)
@@ -109,8 +124,10 @@ class PresentationViewSet(viewsets.ViewSet):
             {'is_full': total_registered_for_presentation >= int(models.Misc.objects.get(pk='presentation_cap').desc)})
         return Response(response)
 
-    def retrieve(self, request, pk=None):
-        queryset = models.Presentation.objects.all()
+    def retrieve(self, request, year=None, pk=None):
+        if year is None:
+            year = datetime.datetime.now().year
+        queryset = models.Presentation.objects.filter(year=year)
         presentation = get_object_or_404(queryset, pk=pk)
         serializer = self.serializer_class(presentation)
         return Response(serializer.data)
@@ -119,13 +136,17 @@ class PresentationViewSet(viewsets.ViewSet):
 class MiscViewSet(viewsets.ViewSet):
     serializer_class = serializers.MiscSerializer
 
-    def list(self, request, **kwargs):
-        queryset = models.Misc.objects.all()
+    def list(self, request, year=None, **kwargs):
+        if year is None:
+            year = datetime.datetime.now().year
+        queryset = models.Misc.objects.filter(year=year)
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)
 
-    def retrieve(self, request, pk=None):
-        queryset = models.Misc.objects.all()
+    def retrieve(self, request, year=None, pk=None):
+        if year is None:
+            year = datetime.datetime.now().year
+        queryset = models.Misc.objects.filter(year=year)
         misc = get_object_or_404(queryset, pk=pk)
         serializer = self.serializer_class(misc)
         return Response(serializer.data)
@@ -282,7 +303,8 @@ class PaymentAPIView(APIView):
             if zarin_response.Status == 100:
                 payment = models.Payment.objects.create(authority=str(zarin_response.Authority),
                                                         total_price=total_price, user=user,
-                                                        presentation=presentation, is_done=False, ref_id='')
+                                                        presentation=presentation, is_done=False, ref_id='',
+                                                        date=datetime.datetime.now(), year=datetime.datetime.now().year)
                 payment.workshops.set(workshops)
                 payment.save()
                 return Response({'message': 'https://www.zarinpal.com/pg/StartPay/' + str(zarin_response.Authority)})
