@@ -149,3 +149,7 @@ EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL')
 # CORS
 CORS_URLS_REGEX = r'^/api/.*$'
 CORS_ORIGIN_ALLOW_ALL = True
+
+X_API_KEY = env.str('X_API_KEY')
+# todo: 0
+X_SANDBOX = '0'

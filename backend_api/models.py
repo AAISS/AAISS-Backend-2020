@@ -259,4 +259,46 @@ class Staff(models.Model):
     entrance = models.IntegerField(blank=True)
 
     def __str__(self):
-        return  self.first_name+' '+self.last_name +' '+str(self.entrance)
+        return self.first_name + ' ' + self.last_name + ' ' + str(self.entrance)
+
+IDPAY_STATUS = [
+    (1, 'payment_not_made'),
+    (2,'payment_failed'),
+    (3,'error'),
+    (4,'blocked'),
+    (5,'return_to_payer'),
+    (6,'system_reversal'),
+    (7,'cancel_payment'),
+    (8,'moved_to_payment_gateway'),
+    (10,'awaiting_payment_verification'),
+    (100,'payment_is_approved'),
+    (101,'payment_is_approved'),
+    (200,'was_deposited'),
+    (201,'payment_created'),
+    (405,"error")
+
+]
+
+class NewPayment(models.Model):
+    total_price = models.PositiveIntegerField()
+    status = models.IntegerField(choices=IDPAY_STATUS, default=201)
+    payment_id = models.CharField(null=True, max_length=42)
+    payment_link = models.TextField(null=True)
+    card_number = models.CharField(null=True, max_length=16)
+    hashed_card_number = models.TextField(null=True)
+    payment_trackID = models.CharField(null=True, max_length=20)
+    verify_trackID = models.CharField(null=True, max_length=20)
+    created_date = models.DateTimeField(null=True)
+    finished_date = models.DateTimeField(null=True)
+    verified_date = models.DateTimeField(null=True)
+    original_data = models.TextField(null=True)
+    workshops = models.ManyToManyField(Workshop, blank=True)
+    presentation = models.BooleanField(default=False, blank=True)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='payments', )
+
+    def payment_state(self):
+        return self.get_status_display()
+
+    def __str__(self):
+        return f"{self.pk}"

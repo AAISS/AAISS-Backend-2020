@@ -21,7 +21,6 @@ PresentationSerializer = all_serializer_creator(models.Presentation)
 MiscSerializer = all_serializer_creator(models.Misc)
 StaffSerializer = all_serializer_creator(models.Staff)
 
-
 class UserSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     name = serializers.CharField(max_length=255, required=True)

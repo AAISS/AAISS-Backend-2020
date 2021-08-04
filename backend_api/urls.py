@@ -54,5 +54,6 @@ urlpatterns = [
     path('', include(staff_routes)),
     path('user/', views.UserAPIView.as_view()),
     path(r'user/<pk>/', views.UserAPIView.as_view()),
-    path('payment/', views.PaymentAPIView.as_view()),
+    path('payment/', views.NewPaymentAPIView.as_view({'post':'payment'})),
+    path('payment/verify/', views.NewPaymentAPIView.as_view({'post':'verify'})),
 ]

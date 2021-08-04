@@ -1,10 +1,17 @@
 import base64
 import datetime
 import json
-
+from  backend_api.idpay import IdPayRequest,IDPAY_PAYMENT_DESCRIPTION, \
+    IDPAY_CALL_BACK, IDPAY_STATUS_201, IDPAY_STATUS_100, IDPAY_STATUS_101, \
+    IDPAY_STATUS_200, IDPAY_STATUS_10
 from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404, redirect
-
+from rest_framework.decorators import action
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAdminUser,
+    AllowAny
+)
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import viewsets
@@ -382,3 +389,130 @@ class PaymentAPIView(APIView):
         else:
             print('am i a joke to you?')
             return redirect(env.str('BASE_URL') + 'notsuccessful')
+
+
+class NewPaymentAPIView(viewsets.ModelViewSet):
+
+    serializer_class = serializers.PaymentInitSerialier
+    client = IdPayRequest()
+
+    def payment(self, request):
+        serializer = self.serializer_class(data=request.data)
+
+        if serializer.is_valid():
+            user = None
+            try:
+                user = models.User.objects.get(
+                    pk=models.Account.objects.get(email=serializer.validated_data.get('email')))
+            except:
+                return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+            if user is None:
+                return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+            workshop_queryset = models.Workshop.objects.all()
+            workshops = []
+            full_workshops = []
+            presentation = False
+            total_price = 0
+            if serializer.validated_data.get('workshops') is not None:
+                for pkid in serializer.validated_data.get('workshops'):
+                    workshop = get_object_or_404(workshop_queryset, pk=pkid)
+                    if len(models.User.objects.filter(registered_workshops=workshop).all()) >= workshop.capacity:
+                        full_workshops.append(workshop.name)
+                    else:
+                        workshops.append(workshop)
+                        total_price += workshop.cost
+            if len(full_workshops) > 0:
+                return Response({'message': 'some are selected workshops are full', 'full_workshops': full_workshops},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            total_registered_for_presentation = len(models.User.objects.filter(registered_for_presentations=True).all())
+            if total_registered_for_presentation >= int(models.Misc.objects.get(
+                    pk='presentation_cap').desc) and serializer.validated_data.get('presentations'):
+                return Response({'message': 'Presentations are full'}, status=status.HTTP_400_BAD_REQUEST)
+
+            if serializer.validated_data.get('presentations'):
+                total_price += int(get_object_or_404(models.Misc.objects.all(), pk='presentation_fee').desc)
+                presentation = True
+
+            payment = models.NewPayment.objects.create(
+                total_price=total_price,
+                user=user,
+                presentation=presentation
+            )
+
+            result = IdPayRequest().create_payment(
+                order_id=payment.pk,
+                amount=int(total_price * 10),
+                desc=IDPAY_PAYMENT_DESCRIPTION,
+                mail=user.account.email,
+                phone=user.phone_number,
+                callback=IDPAY_CALL_BACK,
+                name=user.name
+            )
+            if result['status'] == IDPAY_STATUS_201:
+                payment.created_date = datetime.datetime.now()
+                payment.payment_id = result['id']
+                payment.payment_link = result['link']
+                payment.workshops.set(workshops)
+                payment.save()
+                result['message']=result['link']
+                return Response(result)
+            else:
+                return Response({'message': 'Payment Error with code: ' + str(result['status'])},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response({'message': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def verify(self, request):
+        request_body = request.data
+        idPay_payment_id = request_body['id']
+        order_id = request_body['order_id']
+        payment = models.NewPayment.objects.get(pk=order_id)
+        payment.card_number = request_body['card_no']
+        payment.hashed_card_number = request_body['hashed_card_no']
+        payment.payment_trackID = request_body['track_id']
+        result = IdPayRequest().verify_payment(
+            order_id=order_id,
+            payment_id=idPay_payment_id,
+        )
+        result_status = result['status']
+
+        if not ( any(result_status == status_code for status_code in (IDPAY_STATUS_100, IDPAY_STATUS_101, IDPAY_STATUS_200))):
+            payment.status = result_status
+            payment.original_data = json.dumps(result)
+            payment.save()
+            return Response({'message':'bad'})
+
+        try:
+            payment.status = result_status
+            payment.original_data = json.dumps(result)
+            payment.verify_trackID = result['track_id']
+            payment.finished_date = datetime.utcfromtimestamp(
+                int(result['date']))
+            payment.verified_date = datetime.utcfromtimestamp(
+                int(result['verify']['date']))
+            payment.save()
+            new_registered_workshops = []
+            for ws in payment.user.registered_workshops.all():
+                new_registered_workshops.append(ws)
+            for pws in payment.workshops.all():
+                new_registered_workshops.append(pws)
+            payment.user.registered_workshops.set(new_registered_workshops)
+            payment.user.registered_for_presentations = (
+                    payment.user.registered_for_presentations or payment.presentation)
+            payment.user.save()
+            payment.save()
+            response_data = dict()
+            user_workshops = dict()
+            for workshop in payment.user.registered_workshops.all():
+                user_workshops[workshop.id] = workshop.name
+            response_data['workshops'] = user_workshops
+            response_data['presentation'] = payment.user.registered_for_presentations
+            json_res = json.dumps(response_data)
+            encoded = base64.encodebytes(json_res.encode('UTF-8'))
+            send_register_email(user=payment.user, workshops=payment.workshops.all(),
+                                presentation=payment.presentation)
+            return Response({'message': 'ok!'})
+        except Exception as e:
+            print('Exception: ', e.__str__())
+            return Response({'message':'bad'})
