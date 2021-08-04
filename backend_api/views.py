@@ -154,14 +154,14 @@ class MiscViewSet(viewsets.ViewSet):
     def list(self, request, year=None, **kwargs):
         if year is None:
             year = datetime.datetime.now().year
-        queryset = models.Misc.objects.filter(year=year)
+        queryset = models.Misc.objects.all()
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, year=None, pk=None):
         if year is None:
             year = datetime.datetime.now().year
-        queryset = models.Misc.objects.filter(year=year)
+        queryset = models.Misc.objects.all()
         misc = get_object_or_404(queryset, pk=pk)
         serializer = self.serializer_class(misc)
         return Response(serializer.data)
