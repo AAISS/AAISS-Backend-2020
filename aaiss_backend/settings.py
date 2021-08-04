@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
-
+import configparser
 import os
 import environ
 import mimetypes
@@ -18,21 +18,15 @@ import mimetypes
 mimetypes.add_type("text/html", ".css", True)
 
 env = environ.Env()
-environ.Env.read_env()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
+environ.Env.read_env(BASE_DIR + '/.env')
 
 # production/development key
 SECRET_KEY = env.str("SECRET_KEY", 'orlch#mu_+2-my=fo)akh_3+^j7+7tc@v*-*z^(g*%(&lih@pv')
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool("DEBUG", False)
+DEBUG = env.bool("DEBUG", True)
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(" ")
 
@@ -150,6 +144,6 @@ EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL')
 CORS_URLS_REGEX = r'^/api/.*$'
 CORS_ORIGIN_ALLOW_ALL = True
 
-X_API_KEY = env.str('X_API_KEY')
-# todo: 0
-X_SANDBOX = '0'
+X_API_KEY = env.str('X_API_KEY', '')
+X_SANDBOX = env.str('X_SANDBOX', '')
+print(X_API_KEY)

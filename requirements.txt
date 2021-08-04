@@ -5,3 +5,4 @@ django-environ==0.4.5
 zeep==3.4.0
 django-cors-headers==3.4.0
 gunicorn==20.0.4
+python-decouple==3.3
