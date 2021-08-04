@@ -28,7 +28,8 @@ SECRET_KEY = env.str("SECRET_KEY", 'orlch#mu_+2-my=fo)akh_3+^j7+7tc@v*-*z^(g*%(&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", True)
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(" ")
+ALLOWED_HOSTS = env.str("ALLOWED_HOSTS", "").split(" ")
+print(ALLOWED_HOSTS)
 
 # Application definition
 
@@ -147,3 +148,4 @@ CORS_ORIGIN_ALLOW_ALL = True
 X_API_KEY = env.str('X_API_KEY', '')
 X_SANDBOX = env.str('X_SANDBOX', '')
 print(X_API_KEY)
+print(EMAIL_HOST,EMAIL_PORT,EMAIL_BACKEND,EMAIL_USE_TLS)
