@@ -29,6 +29,7 @@ def desc_creator(selected_model):
 
 
 admin.site.register(models.Account)
+admin.site.register(models.NewPayment)
 
 
 class UserAdmin(admin.ModelAdmin):
