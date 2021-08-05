@@ -491,9 +491,9 @@ class NewPaymentAPIView(viewsets.ModelViewSet):
             payment.status = result_status
             payment.original_data = json.dumps(result)
             payment.verify_trackID = result['track_id']
-            payment.finished_date = datetime.utcfromtimestamp(
+            payment.finished_date = datetime.datetime.utcfromtimestamp(
                 int(result['date']))
-            payment.verified_date = datetime.utcfromtimestamp(
+            payment.verified_date = datetime.datetime.utcfromtimestamp(
                 int(result['verify']['date']))
             payment.save()
             new_registered_workshops = []
