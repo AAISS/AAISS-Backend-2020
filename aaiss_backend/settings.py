@@ -121,7 +121,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
-APPEND_SLASH=True
+APPEND_SLASH = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
@@ -133,15 +133,6 @@ AUTH_USER_MODEL = 'backend_api.Account'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-# SMTP and email sending
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = env.str('EMAIL_HOST')
-EMAIL_PORT = env.int('EMAIL_PORT')
-EMAIL_HOST_USER = env.str('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD')
-EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS')
-EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL')
-
 # CORS
 CORS_URLS_REGEX = r'^/api/.*$'
 CORS_ORIGIN_ALLOW_ALL = True
@@ -149,4 +140,31 @@ CORS_ORIGIN_ALLOW_ALL = True
 X_API_KEY = env.str('X_API_KEY', '')
 X_SANDBOX = env.str('X_SANDBOX', '')
 print(X_API_KEY)
-print(EMAIL_HOST,EMAIL_PORT,EMAIL_BACKEND,EMAIL_USE_TLS)
+
+
+SERVER_EMAIL = 'smtp-relay.sendinblue.com'
+EMAIL_BACKEND = "anymail.backends.sendinblue.EmailBackend"
+
+EMAIL_HOST = env.str('EMAIL_HOST')
+EMAIL_HOST_USER = env.str('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = env.int('EMAIL_PORT')
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+ANYMAIL = {
+    "SENDINBLUE_API_KEY": env.str("SENDINBLUE_API_KEY","")
+}
+
+print(EMAIL_HOST)
+print(EMAIL_HOST_USER)
+print(EMAIL_HOST_PASSWORD)
+print(ANYMAIL)
+
+ALT_EMAIL_HOST = env.str("ALT_EMAIL_HOST", '')
+ALT_EMAIL_HOST_USER = env.str("ALT_EMAIL_HOST_USER", '')
+ALT_EMAIL_HOST_PASSWORD = env.str("ALT_EMAIL_HOST_PASSWORD", '')
+ALT_EMAIL_PORT = env.int("ALT_EMAIL_PORT", '')
+ALT_EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL')
