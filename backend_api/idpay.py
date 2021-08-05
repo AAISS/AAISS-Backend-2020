@@ -53,8 +53,9 @@ class IdPayRequest:
             "callback": callback
         }
         response=requests.request(method='POST',headers=self.__headers,url=IDPAY_URL,data=json.dumps(body))
+        print(response.text)
         json_response=json.loads(response.text)
-        print(json_response)
+        # print(json_response)
         json_response['status']=response.status_code
         # print(json_response)
         return json_response
