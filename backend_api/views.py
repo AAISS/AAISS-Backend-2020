@@ -468,27 +468,28 @@ class NewPaymentAPIView(viewsets.ModelViewSet):
             return Response({'message': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
 
     def verify(self, request):
-        request_body = request.data
-        idPay_payment_id = request_body['id']
-        order_id = request_body['order_id']
-        payment = models.NewPayment.objects.get(pk=order_id)
-        payment.card_number = request_body['card_no']
-        payment.hashed_card_number = request_body['hashed_card_no']
-        payment.payment_trackID = request_body['track_id']
-        result = IdPayRequest().verify_payment(
-            order_id=order_id,
-            payment_id=idPay_payment_id,
-        )
-        result_status = result['status']
-
-        if not (
-        any(result_status == status_code for status_code in (IDPAY_STATUS_100, IDPAY_STATUS_101, IDPAY_STATUS_200))):
-            payment.status = result_status
-            payment.original_data = json.dumps(result)
-            payment.save()
-            return redirect(F'{settings.BASE_URL}?payment_status=false')
-
         try:
+            request_body = request.data
+            idPay_payment_id = request_body['id']
+            order_id = request_body['order_id']
+            payment = models.NewPayment.objects.get(pk=order_id)
+            payment.card_number = request_body['card_no']
+            payment.hashed_card_number = request_body['hashed_card_no']
+            payment.payment_trackID = request_body['track_id']
+            result = IdPayRequest().verify_payment(
+                order_id=order_id,
+                payment_id=idPay_payment_id,
+            )
+            result_status = result['status']
+
+            if not (
+                    any(result_status == status_code for status_code in
+                        (IDPAY_STATUS_100, IDPAY_STATUS_101, IDPAY_STATUS_200))):
+                payment.status = result_status
+                payment.original_data = json.dumps(result)
+                payment.save()
+                return redirect(F'{settings.BASE_URL}?payment_status=false')
+
             payment.status = result_status
             payment.original_data = json.dumps(result)
             payment.verify_trackID = result['track_id']
