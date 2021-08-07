@@ -3,6 +3,7 @@ import datetime
 import json
 from threading import Thread
 
+from aaiss_backend import settings
 from backend_api.email import send_simple_email
 from  backend_api.idpay import IdPayRequest,IDPAY_PAYMENT_DESCRIPTION, \
     IDPAY_CALL_BACK, IDPAY_STATUS_201, IDPAY_STATUS_100, IDPAY_STATUS_101, \
@@ -174,7 +175,7 @@ class UserAPIView(APIView):
     serializer_class = serializers.UserSerializer
 
     def get(self, request, pk=None, format=None):
-        if request.META.get('HTTP_DAUTH') == env.str('DISCORD_TOKEN'):
+        if request.META.get('HTTP_DAUTH') == settings.DISCORD_BOT_TOKEN:
             try:
                 model_user = models.User.objects.get(account__email=(pk.lower()))
             except KeyError as e:
