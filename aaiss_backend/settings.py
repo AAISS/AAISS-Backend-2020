@@ -141,7 +141,6 @@ X_API_KEY = env.str('X_API_KEY', '')
 X_SANDBOX = env.str('X_SANDBOX', '')
 print(X_API_KEY)
 
-
 SERVER_EMAIL = 'smtp-relay.sendinblue.com'
 EMAIL_BACKEND = "anymail.backends.sendinblue.EmailBackend"
 
@@ -152,7 +151,7 @@ EMAIL_PORT = env.int('EMAIL_PORT')
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 ANYMAIL = {
-    "SENDINBLUE_API_KEY": env.str("SENDINBLUE_API_KEY","")
+    "SENDINBLUE_API_KEY": env.str("SENDINBLUE_API_KEY", "")
 }
 
 print(EMAIL_HOST)
@@ -166,6 +165,6 @@ ALT_EMAIL_HOST_PASSWORD = env.str("ALT_EMAIL_HOST_PASSWORD", '')
 ALT_EMAIL_PORT = env.int("ALT_EMAIL_PORT", '')
 ALT_EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-
 DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL')
-DISCORD_BOT_TOKEN = env.str('DISCORD_BOT_TOKEN')
+
+BASE_URL = 'https://aaiss.ce.aut.ac.ir/'

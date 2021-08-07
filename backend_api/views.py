@@ -2,10 +2,9 @@ import base64
 import datetime
 import json
 from threading import Thread
-
 from aaiss_backend import settings
 from backend_api.email import send_simple_email
-from  backend_api.idpay import IdPayRequest,IDPAY_PAYMENT_DESCRIPTION, \
+from backend_api.idpay import IdPayRequest, IDPAY_PAYMENT_DESCRIPTION, \
     IDPAY_CALL_BACK, IDPAY_STATUS_201, IDPAY_STATUS_100, IDPAY_STATUS_101, \
     IDPAY_STATUS_200, IDPAY_STATUS_10
 from django.db.utils import IntegrityError
@@ -36,6 +35,7 @@ class FieldOfInterestViewSet(viewsets.ViewSet):
         queryset = models.FieldOfInterest.objects.all()
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)
+
 
 class StaffViewSet(viewsets.ViewSet):
     serializer_class = serializers.StaffSerializer
@@ -175,7 +175,7 @@ class UserAPIView(APIView):
     serializer_class = serializers.UserSerializer
 
     def get(self, request, pk=None, format=None):
-        if request.META.get('HTTP_DAUTH') == settings.DISCORD_BOT_TOKEN:
+        if request.META.get('HTTP_DAUTH') == env.str('DISCORD_TOKEN'):
             try:
                 model_user = models.User.objects.get(account__email=(pk.lower()))
             except KeyError as e:
@@ -264,7 +264,7 @@ def send_register_email(user, workshops, presentation):
     body += "\n<br>\n<br>\nBest regards, AAISS team."
 
     # MailerThread(subject=subject, targets=[user.account.email], html_body=body).start()
-    Thread(target=send_simple_email, args=(subject,user.account.email,body)).start()
+    Thread(target=send_simple_email, args=(subject, user.account.email, body)).start()
 
 
 class PaymentAPIView(APIView):
@@ -397,7 +397,6 @@ class PaymentAPIView(APIView):
 
 
 class NewPaymentAPIView(viewsets.ModelViewSet):
-
     serializer_class = serializers.PaymentInitSerialier
     client = IdPayRequest()
 
@@ -460,7 +459,7 @@ class NewPaymentAPIView(viewsets.ModelViewSet):
                 payment.payment_link = result['link']
                 payment.workshops.set(workshops)
                 payment.save()
-                result['message']=result['link']
+                result['message'] = result['link']
                 return Response(result)
             else:
                 return Response({'message': 'Payment Error with code: ' + str(result['status'])},
@@ -469,26 +468,28 @@ class NewPaymentAPIView(viewsets.ModelViewSet):
             return Response({'message': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
 
     def verify(self, request):
-        request_body = request.data
-        idPay_payment_id = request_body['id']
-        order_id = request_body['order_id']
-        payment = models.NewPayment.objects.get(pk=order_id)
-        payment.card_number = request_body['card_no']
-        payment.hashed_card_number = request_body['hashed_card_no']
-        payment.payment_trackID = request_body['track_id']
-        result = IdPayRequest().verify_payment(
-            order_id=order_id,
-            payment_id=idPay_payment_id,
-        )
-        result_status = result['status']
-
-        if not ( any(result_status == status_code for status_code in (IDPAY_STATUS_100, IDPAY_STATUS_101, IDPAY_STATUS_200))):
-            payment.status = result_status
-            payment.original_data = json.dumps(result)
-            payment.save()
-            return Response({'message':'bad'})
-
         try:
+            request_body = request.data
+            idPay_payment_id = request_body['id']
+            order_id = request_body['order_id']
+            payment = models.NewPayment.objects.get(pk=order_id)
+            payment.card_number = request_body['card_no']
+            payment.hashed_card_number = request_body['hashed_card_no']
+            payment.payment_trackID = request_body['track_id']
+            result = IdPayRequest().verify_payment(
+                order_id=order_id,
+                payment_id=idPay_payment_id,
+            )
+            result_status = result['status']
+
+            if not (
+                    any(result_status == status_code for status_code in
+                        (IDPAY_STATUS_100, IDPAY_STATUS_101, IDPAY_STATUS_200))):
+                payment.status = result_status
+                payment.original_data = json.dumps(result)
+                payment.save()
+                return redirect(F'{settings.BASE_URL}?payment_status=false')
+
             payment.status = result_status
             payment.original_data = json.dumps(result)
             payment.verify_trackID = result['track_id']
@@ -517,7 +518,7 @@ class NewPaymentAPIView(viewsets.ModelViewSet):
             encoded = base64.encodebytes(json_res.encode('UTF-8'))
             send_register_email(user=payment.user, workshops=payment.workshops.all(),
                                 presentation=payment.presentation)
-            return Response({'message': 'ok!'})
+            return redirect(F'{settings.BASE_URL}?payment_status=true')
         except Exception as e:
             print('Exception: ', e.__str__())
-            return Response({'message':'bad'})
+            return redirect(F'{settings.BASE_URL}?payment_status=false')
