@@ -166,5 +166,6 @@ ALT_EMAIL_PORT = env.int("ALT_EMAIL_PORT", '')
 ALT_EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL')
+DISCORD_BOT_TOKEN = env.str('DISCORD_BOT_TOKEN')
 
 BASE_URL = 'https://aaiss.ce.aut.ac.ir/'

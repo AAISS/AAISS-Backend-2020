@@ -175,7 +175,7 @@ class UserAPIView(APIView):
     serializer_class = serializers.UserSerializer
 
     def get(self, request, pk=None, format=None):
-        if request.META.get('HTTP_DAUTH') == env.str('DISCORD_TOKEN'):
+        if request.META.get('HTTP_DAUTH') == settings.DISCORD_BOT_TOKEN:
             try:
                 model_user = models.User.objects.get(account__email=(pk.lower()))
             except KeyError as e:
