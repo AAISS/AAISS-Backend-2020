@@ -261,23 +261,36 @@ class Staff(models.Model):
     def __str__(self):
         return self.first_name + ' ' + self.last_name + ' ' + str(self.entrance)
 
+
+class Committee(models.Model):
+    profile = models.ImageField(verbose_name='profile', null=True, blank=True)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    description = models.CharField(max_length=50)
+    year = models.IntegerField(blank=False, default=2020)
+
+    def __str__(self):
+        return self.first_name + ' ' + self.last_name + ' ' + str(self.description)
+
+
 IDPAY_STATUS = [
     (1, 'payment_not_made'),
-    (2,'payment_failed'),
-    (3,'error'),
-    (4,'blocked'),
-    (5,'return_to_payer'),
-    (6,'system_reversal'),
-    (7,'cancel_payment'),
-    (8,'moved_to_payment_gateway'),
-    (10,'awaiting_payment_verification'),
-    (100,'payment_is_approved'),
-    (101,'payment_is_approved'),
-    (200,'was_deposited'),
-    (201,'payment_created'),
-    (405,"error")
+    (2, 'payment_failed'),
+    (3, 'error'),
+    (4, 'blocked'),
+    (5, 'return_to_payer'),
+    (6, 'system_reversal'),
+    (7, 'cancel_payment'),
+    (8, 'moved_to_payment_gateway'),
+    (10, 'awaiting_payment_verification'),
+    (100, 'payment_is_approved'),
+    (101, 'payment_is_approved'),
+    (200, 'was_deposited'),
+    (201, 'payment_created'),
+    (405, "error")
 
 ]
+
 
 class NewPayment(models.Model):
     total_price = models.PositiveIntegerField()

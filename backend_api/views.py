@@ -46,6 +46,14 @@ class StaffViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
 
+class CommitteeViewSet(viewsets.ViewSet):
+    serializer_class = serializers.CommitteeSerializer
+
+    def list(self, request, **kwargs):
+        queryset = models.Committee.objects.all()
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data)
+
 class TeacherViewSet(viewsets.ViewSet):
     serializer_class = serializers.TeacherSerializer
 
@@ -267,133 +275,133 @@ def send_register_email(user, workshops, presentation):
     Thread(target=send_simple_email, args=(subject, user.account.email, body)).start()
 
 
-class PaymentAPIView(APIView):
-    serializer_class = serializers.PaymentInitSerialier
-    client = Client('https://www.zarinpal.com/pg/services/WebGate/wsdl')
-
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-
-        if serializer.is_valid():
-            user = None
-            try:
-                user = models.User.objects.get(
-                    pk=models.Account.objects.get(email=serializer.validated_data.get('email')))
-            except:
-                return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-            if user is None:
-                return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-            workshop_queryset = models.Workshop.objects.all()
-            workshops = []
-            full_workshops = []
-            presentation = False
-            total_price = 0
-            if serializer.validated_data.get('workshops') is not None:
-                for pkid in serializer.validated_data.get('workshops'):
-                    workshop = get_object_or_404(workshop_queryset, pk=pkid)
-                    if len(models.User.objects.filter(registered_workshops=workshop).all()) >= workshop.capacity:
-                        full_workshops.append(workshop.name)
-                    else:
-                        workshops.append(workshop)
-                        total_price += workshop.cost
-            if len(full_workshops) > 0:
-                return Response({'message': 'some are selected workshops are full', 'full_workshops': full_workshops},
-                                status=status.HTTP_400_BAD_REQUEST)
-
-            total_registered_for_presentation = len(models.User.objects.filter(registered_for_presentations=True).all())
-            if total_registered_for_presentation >= int(models.Misc.objects.get(
-                    pk='presentation_cap').desc) and serializer.validated_data.get('presentations'):
-                return Response({'message': 'Presentations are full'}, status=status.HTTP_400_BAD_REQUEST)
-
-            if serializer.validated_data.get('presentations'):
-                total_price += int(get_object_or_404(models.Misc.objects.all(), pk='presentation_fee').desc)
-                presentation = True
-
-            payment_init_data = {
-                'MerchantID': env.str('MERCHANT_ID'),
-                'Amount': total_price,
-                'Description': 'ثبت نام در کارگاه ها/ارائه های رخداد AAISS',
-                'CallbackURL': env.str('BASE_URL') + 'api/payment/'
-            }
-
-            zarin_response = self.client.service.PaymentRequest(payment_init_data['MerchantID'],
-                                                                payment_init_data['Amount'],
-                                                                payment_init_data['Description'], '', '',
-                                                                payment_init_data['CallbackURL'])
-            if zarin_response.Status == 100:
-                payment = models.Payment.objects.create(authority=str(zarin_response.Authority),
-                                                        total_price=total_price, user=user,
-                                                        presentation=presentation, is_done=False, ref_id='',
-                                                        date=datetime.datetime.now(), year=datetime.datetime.now().year)
-                payment.workshops.set(workshops)
-                payment.save()
-                return Response({'message': 'https://www.zarinpal.com/pg/StartPay/' + str(zarin_response.Authority)})
-            else:
-                return Response({'message': 'Payment Error with code: ' + str(zarin_response.Status)},
-                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        else:
-            return Response({'message': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
-
-    def get(self, request):
-        zarin_status = request.query_params.get('Status')
-        authority = request.query_params.get('Authority')
-        if authority is not None and status is not None:
-            try:
-                payment = models.Payment.objects.get(pk=authority)
-            except:
-                print('no payment found')
-                return redirect(env.str('BASE_URL') + 'notsuccessful')
-            if zarin_status != 'OK':
-                print('status not ok')
-                return redirect(env.str('BASE_URL') + 'notsuccessful')
-
-            try:
-                zarin_response = self.client.service.PaymentVerification(env.str('MERCHANT_ID'), authority,
-                                                                         payment.total_price)
-                if zarin_response.Status == 100:
-                    payment.ref_id = zarin_response.RefID
-                    payment.save()
-                elif zarin_response.Status == 101:
-                    response_data = dict()
-                    user_workshops = dict()
-                    for workshop in payment.user.registered_workshops.all():
-                        user_workshops[workshop.id] = workshop.name
-                    response_data['workshops'] = user_workshops
-                    response_data['presentation'] = payment.user.registered_for_presentations
-                    json_res = json.dumps(response_data)
-                    encoded = base64.encodebytes(json_res.encode('UTF-8'))
-                    return redirect(env.str('BASE_URL') + 'successful' + '?data=' + encoded.decode('UTF-8'))
-                else:
-                    print('zarin status not success')
-                    return redirect(env.str('BASE_URL') + 'notsuccessful')
-                new_registered_workshops = []
-                for ws in payment.user.registered_workshops.all():
-                    new_registered_workshops.append(ws)
-                for pws in payment.workshops.all():
-                    new_registered_workshops.append(pws)
-                payment.user.registered_workshops.set(new_registered_workshops)
-                payment.user.registered_for_presentations = (
-                        payment.user.registered_for_presentations or payment.presentation)
-                payment.user.save()
-                payment.is_done = True
-                payment.save()
-                response_data = dict()
-                user_workshops = dict()
-                for workshop in payment.user.registered_workshops.all():
-                    user_workshops[workshop.id] = workshop.name
-                response_data['workshops'] = user_workshops
-                response_data['presentation'] = payment.user.registered_for_presentations
-                json_res = json.dumps(response_data)
-                encoded = base64.encodebytes(json_res.encode('UTF-8'))
-                send_register_email(user=payment.user, workshops=payment.workshops.all(),
-                                    presentation=payment.presentation)
-                return redirect(env.str('BASE_URL') + 'successful' + '?data=' + encoded.decode('UTF-8'))
-            except Exception as e:
-                print('Exception: ', e.__str__())
-                return redirect(env.str('BASE_URL') + 'notsuccessful')
-        else:
-            print('am i a joke to you?')
-            return redirect(env.str('BASE_URL') + 'notsuccessful')
+# class PaymentAPIView(APIView):
+#     serializer_class = serializers.PaymentInitSerialier
+#     client = Client('https://www.zarinpal.com/pg/services/WebGate/wsdl')
+#
+#     def post(self, request):
+#         serializer = self.serializer_class(data=request.data)
+#
+#         if serializer.is_valid():
+#             user = None
+#             try:
+#                 user = models.User.objects.get(
+#                     pk=models.Account.objects.get(email=serializer.validated_data.get('email')))
+#             except:
+#                 return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+#             if user is None:
+#                 return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+#             workshop_queryset = models.Workshop.objects.all()
+#             workshops = []
+#             full_workshops = []
+#             presentation = False
+#             total_price = 0
+#             if serializer.validated_data.get('workshops') is not None:
+#                 for pkid in serializer.validated_data.get('workshops'):
+#                     workshop = get_object_or_404(workshop_queryset, pk=pkid)
+#                     if len(models.User.objects.filter(registered_workshops=workshop).all()) >= workshop.capacity:
+#                         full_workshops.append(workshop.name)
+#                     else:
+#                         workshops.append(workshop)
+#                         total_price += workshop.cost
+#             if len(full_workshops) > 0:
+#                 return Response({'message': 'some are selected workshops are full', 'full_workshops': full_workshops},
+#                                 status=status.HTTP_400_BAD_REQUEST)
+#
+#             total_registered_for_presentation = len(models.User.objects.filter(registered_for_presentations=True).all())
+#             if total_registered_for_presentation >= int(models.Misc.objects.get(
+#                     pk='presentation_cap').desc) and serializer.validated_data.get('presentations'):
+#                 return Response({'message': 'Presentations are full'}, status=status.HTTP_400_BAD_REQUEST)
+#
+#             if serializer.validated_data.get('presentations'):
+#                 total_price += int(get_object_or_404(models.Misc.objects.all(), pk='presentation_fee').desc)
+#                 presentation = True
+#
+#             payment_init_data = {
+#                 'MerchantID': env.str('MERCHANT_ID'),
+#                 'Amount': total_price,
+#                 'Description': 'ثبت نام در کارگاه ها/ارائه های رخداد AAISS',
+#                 'CallbackURL': env.str('BASE_URL') + 'api/payment/'
+#             }
+#
+#             zarin_response = self.client.service.PaymentRequest(payment_init_data['MerchantID'],
+#                                                                 payment_init_data['Amount'],
+#                                                                 payment_init_data['Description'], '', '',
+#                                                                 payment_init_data['CallbackURL'])
+#             if zarin_response.Status == 100:
+#                 payment = models.Payment.objects.create(authority=str(zarin_response.Authority),
+#                                                         total_price=total_price, user=user,
+#                                                         presentation=presentation, is_done=False, ref_id='',
+#                                                         date=datetime.datetime.now(), year=datetime.datetime.now().year)
+#                 payment.workshops.set(workshops)
+#                 payment.save()
+#                 return Response({'message': 'https://www.zarinpal.com/pg/StartPay/' + str(zarin_response.Authority)})
+#             else:
+#                 return Response({'message': 'Payment Error with code: ' + str(zarin_response.Status)},
+#                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#         else:
+#             return Response({'message': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
+#
+#     def get(self, request):
+#         zarin_status = request.query_params.get('Status')
+#         authority = request.query_params.get('Authority')
+#         if authority is not None and status is not None:
+#             try:
+#                 payment = models.Payment.objects.get(pk=authority)
+#             except:
+#                 print('no payment found')
+#                 return redirect(env.str('BASE_URL') + 'notsuccessful')
+#             if zarin_status != 'OK':
+#                 print('status not ok')
+#                 return redirect(env.str('BASE_URL') + 'notsuccessful')
+#
+#             try:
+#                 zarin_response = self.client.service.PaymentVerification(env.str('MERCHANT_ID'), authority,
+#                                                                          payment.total_price)
+#                 if zarin_response.Status == 100:
+#                     payment.ref_id = zarin_response.RefID
+#                     payment.save()
+#                 elif zarin_response.Status == 101:
+#                     response_data = dict()
+#                     user_workshops = dict()
+#                     for workshop in payment.user.registered_workshops.all():
+#                         user_workshops[workshop.id] = workshop.name
+#                     response_data['workshops'] = user_workshops
+#                     response_data['presentation'] = payment.user.registered_for_presentations
+#                     json_res = json.dumps(response_data)
+#                     encoded = base64.encodebytes(json_res.encode('UTF-8'))
+#                     return redirect(env.str('BASE_URL') + 'successful' + '?data=' + encoded.decode('UTF-8'))
+#                 else:
+#                     print('zarin status not success')
+#                     return redirect(env.str('BASE_URL') + 'notsuccessful')
+#                 new_registered_workshops = []
+#                 for ws in payment.user.registered_workshops.all():
+#                     new_registered_workshops.append(ws)
+#                 for pws in payment.workshops.all():
+#                     new_registered_workshops.append(pws)
+#                 payment.user.registered_workshops.set(new_registered_workshops)
+#                 payment.user.registered_for_presentations = (
+#                         payment.user.registered_for_presentations or payment.presentation)
+#                 payment.user.save()
+#                 payment.is_done = True
+#                 payment.save()
+#                 response_data = dict()
+#                 user_workshops = dict()
+#                 for workshop in payment.user.registered_workshops.all():
+#                     user_workshops[workshop.id] = workshop.name
+#                 response_data['workshops'] = user_workshops
+#                 response_data['presentation'] = payment.user.registered_for_presentations
+#                 json_res = json.dumps(response_data)
+#                 encoded = base64.encodebytes(json_res.encode('UTF-8'))
+#                 send_register_email(user=payment.user, workshops=payment.workshops.all(),
+#                                     presentation=payment.presentation)
+#                 return redirect(env.str('BASE_URL') + 'successful' + '?data=' + encoded.decode('UTF-8'))
+#             except Exception as e:
+#                 print('Exception: ', e.__str__())
+#                 return redirect(env.str('BASE_URL') + 'notsuccessful')
+#         else:
+#             print('am i a joke to you?')
+#             return redirect(env.str('BASE_URL') + 'notsuccessful')
 
 
 class NewPaymentAPIView(viewsets.ModelViewSet):

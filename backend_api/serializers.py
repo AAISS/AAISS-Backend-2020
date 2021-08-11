@@ -20,6 +20,7 @@ WorkshopSerializer = all_serializer_creator(models.Workshop)
 PresentationSerializer = all_serializer_creator(models.Presentation)
 MiscSerializer = all_serializer_creator(models.Misc)
 StaffSerializer = all_serializer_creator(models.Staff)
+CommitteeSerializer = all_serializer_creator(models.Committee)
 
 class UserSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)

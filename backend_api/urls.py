@@ -16,6 +16,9 @@ router.register('foi', views.FieldOfInterestViewSet, basename='field_of_interest
 staff_routes = [
     path(r'<int:year>/staff/', views.StaffViewSet.as_view({'get': 'list'})),
 ]
+committee_routes = [
+    path(r'<int:year>/committee/', views.CommitteeViewSet.as_view({'get': 'list'})),
+]
 
 teacher_routes = [
     path(r'<int:year>/teacher/', views.TeacherViewSet.as_view({'get': 'list'})),
@@ -52,6 +55,7 @@ urlpatterns = [
     path('', include(workshop_route)),
     path('', include(misc_route)),
     path('', include(staff_routes)),
+    path('', include(committee_routes)),
     path('user/', views.UserAPIView.as_view()),
     path(r'user/<pk>/', views.UserAPIView.as_view()),
     path('payment/', views.NewPaymentAPIView.as_view({'post':'payment'})),
