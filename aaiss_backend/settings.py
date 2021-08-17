@@ -26,9 +26,9 @@ environ.Env.read_env(BASE_DIR + '/.env')
 # production/development key
 SECRET_KEY = env.str("SECRET_KEY", 'orlch#mu_+2-my=fo)akh_3+^j7+7tc@v*-*z^(g*%(&lih@pv')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool("DEBUG", False)
+DEBUG = env.bool("DEBUG", True)
 
-ALLOWED_HOSTS = env.str("ALLOWED_HOSTS", "").split(" ")
+ALLOWED_HOSTS = env.str("ALLOWED_HOSTS", "*").split(" ")
 print(ALLOWED_HOSTS)
 
 # Application definition
@@ -63,7 +63,9 @@ APPEND_SLASH = False
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR + '/templates/html/'
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -74,8 +76,12 @@ TEMPLATES = [
             ],
         },
     },
+    {
+        'BACKEND': 'django.template.backends.jinja2.Jinja2',
+        'DIRS': [
+            BASE_DIR + '/templates/html/'],
+    },
 ]
-
 WSGI_APPLICATION = 'aaiss_backend.wsgi.application'
 
 # Database
@@ -144,10 +150,10 @@ print(X_API_KEY)
 SERVER_EMAIL = 'smtp-relay.sendinblue.com'
 EMAIL_BACKEND = "anymail.backends.sendinblue.EmailBackend"
 
-EMAIL_HOST = env.str('EMAIL_HOST')
-EMAIL_HOST_USER = env.str('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD')
-EMAIL_PORT = env.int('EMAIL_PORT')
+EMAIL_HOST = env.str('EMAIL_HOST', '')
+EMAIL_HOST_USER = env.str('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD', '')
+EMAIL_PORT = env.int('EMAIL_PORT', '')
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 ANYMAIL = {
@@ -165,7 +171,7 @@ ALT_EMAIL_HOST_PASSWORD = env.str("ALT_EMAIL_HOST_PASSWORD", '')
 ALT_EMAIL_PORT = env.int("ALT_EMAIL_PORT", '')
 ALT_EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL')
-DISCORD_BOT_TOKEN = env.str('DISCORD_BOT_TOKEN')
+DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL', '')
+DISCORD_BOT_TOKEN = env.str('DISCORD_BOT_TOKEN', '')
 
 BASE_URL = 'https://aaiss.ce.aut.ac.ir/'

@@ -2,6 +2,9 @@ import base64
 import datetime
 import json
 from threading import Thread
+
+from django.template.loader import render_to_string
+
 from aaiss_backend import settings
 from backend_api.email import send_simple_email
 from backend_api.idpay import IdPayRequest, IDPAY_PAYMENT_DESCRIPTION, \
@@ -53,6 +56,7 @@ class CommitteeViewSet(viewsets.ViewSet):
         queryset = models.Committee.objects.all()
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)
+
 
 class TeacherViewSet(viewsets.ViewSet):
     serializer_class = serializers.TeacherSerializer
@@ -252,26 +256,29 @@ class UserAPIView(APIView):
 
 def send_register_email(user, workshops, presentation):
     subject = 'AAISS registration'
-    body = f"Dear {user.name},\n<br>\n"
-    if presentation:
-        body += 'You successfully registered for presentations'
-        if len(workshops) != 0:
-            body += ' and following workshops:\n<br>\n'
-        else:
-            body += '.\n<br>\n'
-    elif len(workshops) != 0:
-        body += 'You successfully registered for following workshops:\n<br>\n'
+    # body = f"Dear {user.name},\n<br>\n"
+    # if presentation:
+    #     body += 'You successfully registered for presentations'
+    #     if len(workshops) != 0:
+    #         body += ' and following workshops:\n<br>\n'
+    #     else:
+    #         body += '.\n<br>\n'
+    # elif len(workshops) != 0:
+    #     body += 'You successfully registered for following workshops:\n<br>\n'
+    #
+    # if len(workshops) != 0:
+    #     for (i, workshop) in enumerate(workshops):
+    #         body += f'{i + 1}: {workshop.name}'
+    #         if workshop.add_to_calendar_link is not None and workshop.add_to_calendar_link != '':
+    #             body += f' <a href="{workshop.add_to_calendar_link}">Add to calendar</a>'
+    #         body += '\n<br>\n'
+    #
+    # body += "\n<br>\n<br>\nBest regards, AAISS team."
+    #
+    # # MailerThread(subject=subject, targets=[user.account.email], html_body=body).start()
 
-    if len(workshops) != 0:
-        for (i, workshop) in enumerate(workshops):
-            body += f'{i + 1}: {workshop.name}'
-            if workshop.add_to_calendar_link is not None and workshop.add_to_calendar_link != '':
-                body += f' <a href="{workshop.add_to_calendar_link}">Add to calendar</a>'
-            body += '\n<br>\n'
-
-    body += "\n<br>\n<br>\nBest regards, AAISS team."
-
-    # MailerThread(subject=subject, targets=[user.account.email], html_body=body).start()
+    body = render_to_string('AAISS_Info.html',
+                            {'name': user.name, 'workshops_text': ', '.join([w.name for w in workshops])})
     Thread(target=send_simple_email, args=(subject, user.account.email, body)).start()
 
 
