@@ -225,7 +225,7 @@ class UserAPIView(APIView):
                     fois.append(foi)
             try:
                 account = models.Account.objects.create_user(
-                    email=serializer.validated_data.get('email'),
+                    email=str(serializer.validated_data.get('email')).lower(),
                     password='nothing'
                 )
             except IntegrityError:
@@ -402,7 +402,7 @@ class NewPaymentAPIView(viewsets.ModelViewSet):
             user = None
             try:
                 user = models.User.objects.get(
-                    pk=models.Account.objects.get(email=serializer.validated_data.get('email')))
+                    pk=models.Account.objects.get(email=str(serializer.validated_data.get('email')).lower()))
             except:
                 return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
             if user is None:
