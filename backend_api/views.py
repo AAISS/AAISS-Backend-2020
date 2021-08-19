@@ -62,7 +62,6 @@ class TeacherViewSet(viewsets.ViewSet):
     serializer_class = serializers.TeacherSerializer
 
     def list(self, request, year=None, **kwargs):
-        print('YEAAAR ', year)
         queryset = models.Teacher.objects.filter(year=year)
         serializer = self.serializer_class(queryset, many=True)
         for teacher_data in serializer.data:
@@ -75,7 +74,6 @@ class TeacherViewSet(viewsets.ViewSet):
         return Response(response)
 
     def retrieve(self, request, year=None, pk=None):
-        print('YEAAAR ', year)
         if year is None:
             year = datetime.datetime.now().year
         queryset = models.Teacher.objects.filter(year=year)

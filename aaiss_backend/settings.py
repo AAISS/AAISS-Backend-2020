@@ -29,7 +29,6 @@ SECRET_KEY = env.str("SECRET_KEY", 'orlch#mu_+2-my=fo)akh_3+^j7+7tc@v*-*z^(g*%(&
 DEBUG = env.bool("DEBUG", True)
 
 ALLOWED_HOSTS = env.str("ALLOWED_HOSTS", "*").split(" ")
-print(ALLOWED_HOSTS)
 
 # Application definition
 
@@ -145,7 +144,6 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 X_API_KEY = env.str('X_API_KEY', '')
 X_SANDBOX = env.str('X_SANDBOX', '')
-print(X_API_KEY)
 
 SERVER_EMAIL = 'smtp-relay.sendinblue.com'
 EMAIL_BACKEND = "anymail.backends.sendinblue.EmailBackend"
@@ -160,10 +158,6 @@ ANYMAIL = {
     "SENDINBLUE_API_KEY": env.str("SENDINBLUE_API_KEY", "")
 }
 
-print(EMAIL_HOST)
-print(EMAIL_HOST_USER)
-print(EMAIL_HOST_PASSWORD)
-print(ANYMAIL)
 
 ALT_EMAIL_HOST = env.str("ALT_EMAIL_HOST", '')
 ALT_EMAIL_HOST_USER = env.str("ALT_EMAIL_HOST_USER", '')
