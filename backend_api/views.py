@@ -444,6 +444,7 @@ class NewPaymentAPIView(viewsets.ModelViewSet):
                 res = {}
                 res['status'] = 200
                 res['link'] = F'{settings.BASE_URL}?payment_status=true'
+                res['message'] = res['link']
                 return Response(res)
             payment = models.NewPayment.objects.create(
                 total_price=total_price,
