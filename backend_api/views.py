@@ -437,7 +437,7 @@ class NewPaymentAPIView(viewsets.ModelViewSet):
                 for pws in workshops:
                     new_registered_workshops.append(pws)
                 user.registered_workshops.set(new_registered_workshops)
-                user.registered_for_presentations = presentation
+                user.registered_for_presentations = presentation or user.registered_for_presentations
                 user.save()
                 send_register_email(user=user, workshops=workshops,
                                     presentation=presentation)
