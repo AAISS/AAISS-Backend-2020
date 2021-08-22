@@ -6,7 +6,7 @@ from django.core.mail import get_connection
 
 def send_simple_email(subject, email, body):
     message = body
-    if 'yahoo' in email:
+    if 'gmail' not in email:
         connection = get_connection(
             backend=settings.ALT_EMAIL_BACKEND,
             fail_silently=False,

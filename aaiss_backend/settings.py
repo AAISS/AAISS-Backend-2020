@@ -163,7 +163,7 @@ ALT_EMAIL_HOST = env.str("ALT_EMAIL_HOST", '')
 ALT_EMAIL_HOST_USER = env.str("ALT_EMAIL_HOST_USER", '')
 ALT_EMAIL_HOST_PASSWORD = env.str("ALT_EMAIL_HOST_PASSWORD", '')
 ALT_EMAIL_PORT = env.int("ALT_EMAIL_PORT", '')
-ALT_EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+ALT_EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL', '')
 DISCORD_BOT_TOKEN = env.str('DISCORD_BOT_TOKEN', '')
