@@ -430,7 +430,18 @@ class NewPaymentAPIView(viewsets.ModelViewSet):
             if serializer.validated_data.get('presentations'):
                 total_price += int(get_object_or_404(models.Misc.objects.all(), pk='presentation_fee').desc)
                 presentation = True
-
+            if total_price == 0:
+                new_registered_workshops = []
+                for ws in user.registered_workshops.all():
+                    new_registered_workshops.append(ws)
+                for pws in workshops:
+                    new_registered_workshops.append(pws)
+                user.registered_workshops.set(new_registered_workshops)
+                user.registered_for_presentations = presentation
+                user.save()
+                send_register_email(user=user, workshops=workshops,
+                                    presentation=presentation)
+                return redirect(F'{settings.BASE_URL}?payment_status=true')
             payment = models.NewPayment.objects.create(
                 total_price=total_price,
                 user=user,
@@ -507,8 +518,6 @@ class NewPaymentAPIView(viewsets.ModelViewSet):
                 user_workshops[workshop.id] = workshop.name
             response_data['workshops'] = user_workshops
             response_data['presentation'] = payment.user.registered_for_presentations
-            json_res = json.dumps(response_data)
-            encoded = base64.encodebytes(json_res.encode('UTF-8'))
             send_register_email(user=payment.user, workshops=payment.workshops.all(),
                                 presentation=payment.presentation)
             return redirect(F'{settings.BASE_URL}?payment_status=true')
