@@ -441,7 +441,10 @@ class NewPaymentAPIView(viewsets.ModelViewSet):
                 user.save()
                 send_register_email(user=user, workshops=workshops,
                                     presentation=presentation)
-                return redirect(F'{settings.BASE_URL}?payment_status=true')
+                res = {}
+                res['status'] = 200
+                res['link'] = F'{settings.BASE_URL}?payment_status=true'
+                return Response(res)
             payment = models.NewPayment.objects.create(
                 total_price=total_price,
                 user=user,
